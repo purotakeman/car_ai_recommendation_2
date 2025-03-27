@@ -20,5 +20,31 @@
     <h1>車AI推薦システムへようこそ</h1>
     <p>あなたにお勧めの車紹介します</p>
     <!-- <button onclick="sendRequest()">推薦を受ける</button> -->
+     <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>メーカー</th>
+            <th>車種</th>
+            <th>ボディタイプ</th>
+            <th>駆動方式</th>
+            <th>価格(万円)</th>
+            <th>排気量</th>
+            <th>年式</th>
+            <th>モデル</th>
+        </tr>
+        {% for car in cars %}
+        <tr>
+            <td>{{ car['id'] }}</td>
+            <td>{{ car['メーカー'] }}</td>
+            <td>{{ car['車種'] }}</td>
+            <td>{{ car['ボディタイプ'] }}</td>
+            <td>{{ car['駆動方式'] }}</td>
+            <td>{{ car['価格(万円)'] }}</td>
+            <td>{{ car['排気量'] }}</td>
+            <td>{{ car['年式'] }}</td>
+            <td>{{ car['モデル'] }}</td>
+        </tr>
+        {% endfor %}
+     </table>
 </body>
 </html>
