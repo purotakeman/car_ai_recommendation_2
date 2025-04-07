@@ -4,23 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI自動車診断</title>
-    <!-- <script> -->
-        <!-- async function sendRequest() { -->
-            <!-- let response = await fetch('/recommend', { -->
-                <!-- method: 'post', -->
-                <!-- headers: { 'Content-Type': 'application/json' }, -->
-                <!-- body: JSON.stringify({"example": "data"}) -->
-            <!-- }); -->
-            <!-- let result = await response.json(); -->
-            <!-- console.log(result); -->
-        <!-- } -->
-    <!-- </script> -->
+   
 </head>
 <body>
     <h1>車AI推薦システムへようこそ</h1>
     <p>あなたにお勧めの車紹介します</p>
-    <!-- <button onclick="sendRequest()">推薦を受ける</button> -->
-     <table border="1">
+    <form method="POST" action="/">
+        <h3>ボディタイプ(複数選択可能)</h3>
+        <label><input type="checkbox" name="body_type" value="SUV">SUV</label>
+        <label><input type="checkbox" name="body_type" value="セダン">セダン</label>
+        <label><input type="checkbox" name="body_type" value="ハッチバック">ハッチバック</label>  
+        <label><input type="checkbox" name="body_type" value="ミニバン">ミニバン</label>
+            
+        <h3>駆動方式(複数選択可能)</h3>
+        <label><input type="checkbox" name="drive_type" value="2WD">2WD</label>
+        <label><input type="checkbox" name="drive_type" value="4WD">4WD</label>
+        <label><input type="checkbox" name="drive_type" value="4WD+HYBRID">4WD+HYBRID</label>
+        <label><input type="checkbox" name="drive_type" value="2WD+HYBRID">2WD+HYBRID</label>
+        <label><input type="checkbox" name="drive_type" value="PHEV">PHEV</label>
+           
+        <h3>価格(上限)</h3>
+        <input type="number" name="max_price" placeholder="例: 300">    
+    
+        <button type="submit">検索</button>
+    </form>
+     <!-- <table border="1">
         <tr>
             <th>ID</th>
             <th>メーカー</th>
@@ -45,6 +53,6 @@
             <td>{{ car['モデル'] }}</td>
         </tr>
         {% endfor %}
-     </table>
+     </table> -->
 </body>
 </html>
