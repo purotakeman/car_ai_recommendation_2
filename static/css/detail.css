@@ -1,0 +1,609 @@
+/* 詳細ページ用CSS */
+/**
+ * 車両詳細ページ用スタイル
+ * AI自動車診断システム
+ */
+
+/* 詳細ページ全体のレイアウト */
+.detail-section {
+    background-color: var(--card-bg);
+    padding: var(--spacing-xl);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: var(--spacing-xl);
+}
+
+.car-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.car-detail-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    border: none;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: var(--spacing-md);
+    color: var(--primary-color);
+}
+
+.back-link i {
+    margin-right: var(--spacing-xs);
+}
+
+/* 車両概要セクション */
+.car-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.car-image {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.car-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.car-summary {
+    flex: 2;
+    min-width: 300px;
+}
+
+.summary-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-md);
+}
+
+.summary-item {
+    flex: 1;
+    min-width: 140px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.summary-item.full-width {
+    flex: 100%;
+}
+
+.summary-label {
+    font-size: 0.85rem;
+    color: var(--light-text);
+    margin-bottom: var(--spacing-xs);
+    display: block;
+}
+
+.summary-label i {
+    margin-right: var(--spacing-xs);
+    width: 16px;
+    text-align: center;
+}
+
+.summary-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.summary-value.highlight {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+}
+
+/* 評価セクション */
+.car-evaluation {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.car-evaluation h3 {
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+}
+
+.car-evaluation h3 i {
+    margin-right: var(--spacing-sm);
+    color: var(--accent-color);
+}
+
+.evaluation-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xl);
+}
+
+.strengths, .weaknesses {
+    flex: 1;
+    min-width: 300px;
+}
+
+.strengths h4, .weaknesses h4 {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.strength-list, .weakness-list {
+    list-style: none;
+    padding: 0;
+}
+
+.strength-list li, .weakness-list li {
+    margin-bottom: var(--spacing-sm);
+    padding-left: 25px;
+    position: relative;
+}
+
+.strength-list li i, .weakness-list li i {
+    position: absolute;
+    left: 0;
+    top: 3px;
+}
+
+.strength-list li i {
+    color: var(--success-color);
+}
+
+.weakness-list li i {
+    color: var(--warning-color);
+}
+
+/* 推薦理由セクション */
+.car-recommendation {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.car-recommendation h3 {
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+}
+
+.car-recommendation h3 i {
+    margin-right: var(--spacing-sm);
+    color: var(--primary-color);
+}
+
+.recommendation-text {
+    line-height: 1.8;
+}
+
+.recommendation-score {
+    margin-top: var(--spacing-lg);
+}
+
+.score-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+}
+
+.score-bar {
+    height: 30px;
+    background-color: #ecf0f1;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.score-value {
+    height: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 15px;
+    font-weight: bold;
+    transition: width 1s ease-out;
+}
+
+/* タブセクション */
+.car-detail-tabs {
+    margin-bottom: var(--spacing-xl);
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.tab-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: bold;
+    color: var(--light-text);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tab-button:hover {
+    color: var(--primary-color);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* スペック表 */
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.spec-table th, .spec-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+}
+
+.spec-table th {
+    background-color: #f8f9fa;
+    text-align: left;
+    font-weight: bold;
+    width: 30%;
+}
+
+/* 維持費シミュレーション */
+.cost-simulation {
+    margin-top: var(--spacing-md);
+}
+
+.cost-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-md);
+}
+
+.cost-table th, .cost-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+}
+
+.cost-table th {
+    background-color: #f8f9fa;
+    text-align: left;
+    font-weight: bold;
+}
+
+.cost-table .total-row {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+.cost-note {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    padding: var(--spacing-sm);
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.cost-note i {
+    margin-right: var(--spacing-xs);
+    color: var(--primary-color);
+}
+
+/* レビューセクション */
+.reviews-container {
+    margin-top: var(--spacing-md);
+}
+
+.average-rating {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.rating-score {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.big-score {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.stars {
+    color: #f39c12;
+    font-size: 1.2rem;
+    margin: var(--spacing-sm) 0;
+}
+
+.review-count {
+    color: var(--light-text);
+    font-size: 0.9rem;
+}
+
+.rating-breakdown {
+    flex: 2;
+    min-width: 300px;
+}
+
+.rating-category {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.category-label {
+    width: 80px;
+    font-size: 0.9rem;
+}
+
+.rating-bar {
+    flex: 1;
+    height: 8px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    margin: 0 var(--spacing-sm);
+    overflow: hidden;
+}
+
+.rating-value {
+    height: 100%;
+    background-color: #f39c12;
+    border-radius: 4px;
+}
+
+.rating-number {
+    width: 30px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.review-list {
+    margin-bottom: var(--spacing-lg);
+}
+
+.review-item {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.reviewer {
+    display: flex;
+    align-items: center;
+}
+
+.reviewer i {
+    font-size: 1.5rem;
+    color: #95a5a6;
+    margin-right: var(--spacing-sm);
+}
+
+.reviewer-name {
+    font-weight: bold;
+}
+
+.review-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.review-date {
+    font-size: 0.8rem;
+    color: var(--light-text);
+    margin-top: 3px;
+}
+
+.review-content {
+    line-height: 1.6;
+}
+
+.more-reviews {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
+.more-reviews-button {
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.more-reviews-button:hover {
+    background-color: #ecf0f1;
+}
+
+/* 関連車両セクション */
+.related-cars {
+    margin-bottom: var(--spacing-xl);
+}
+
+.related-cars h3 {
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+}
+
+.related-cars h3 i {
+    margin-right: var(--spacing-sm);
+    color: var(--primary-color);
+}
+
+.related-cars-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.related-car-item {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: var(--spacing-md);
+    transition: all 0.3s;
+}
+
+.related-car-item:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-3px);
+}
+
+.related-car-header {
+    margin-bottom: var(--spacing-md);
+}
+
+.related-car-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.related-car-info {
+    margin-bottom: var(--spacing-md);
+}
+
+.related-car-info .info-row {
+    margin-bottom: var(--spacing-xs);
+    display: flex;
+    font-size: 0.9rem;
+}
+
+.related-car-info .label {
+    width: 60px;
+    color: var(--light-text);
+}
+
+.related-car-info .value {
+    font-weight: bold;
+}
+
+.related-car-link {
+    display: inline-block;
+    margin-top: var(--spacing-sm);
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    transition: all 0.3s;
+}
+
+.related-car-link i {
+    margin-left: var(--spacing-xs);
+    transition: transform 0.3s;
+}
+
+.related-car-link:hover i {
+    transform: translateX(3px);
+}
+
+/* 戻るセクション */
+.back-section {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+}
+
+.back-button {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.back-button:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}
+
+.back-button i {
+    margin-right: var(--spacing-sm);
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .car-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .car-detail-header h2 {
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .car-overview {
+        flex-direction: column;
+    }
+    
+    .car-image {
+        max-width: 100%;
+    }
+    
+    .evaluation-content {
+        flex-direction: column;
+    }
+    
+    .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .related-cars-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* アニメーション */
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content.active {
+    animation: tabFadeIn 0.4s ease-out forwards;
+}
