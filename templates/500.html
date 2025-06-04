@@ -1,1 +1,112 @@
 <!-- 500エラーページ（未実装） -->
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サーバーエラー - AI自動車推薦システム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .error-container { 
+            text-align: cnter;
+            padding: 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .error-icon {
+            font-size: 8rem;
+            color: #e74c3c;
+            margin-bottom: 30px;
+        }
+        .error-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .error-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .error-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .error-button:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+        .error-details {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        .error-details h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        .error-details ul {
+            color: #6c757d;
+            line-height: 1.8;
+        }
+
+    </style>
+ </head>
+ <body>
+    <div class="container">
+        <div class="error-container">
+            <div class="error-container">
+                <div class="error-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+
+                <h1 class="error-title">500 - サーバーエラー</h1>
+
+                <p class="error-message">
+                    申し訳ございません。サーバー内部でエラーが発生しました。<br>
+                    しばらく時間をおいてから再度アクセスしてください。
+                </p>
+
+                <div class="error-actions">
+                    <a href="/" class="error-button">
+                        <i class="fas fa-home"></i>
+                        トップページに戻る
+                    </a>
+                    <a href="javascript:location.reload()" class="error-button">
+                        <i class="fas fa-redo"></i>
+                        ページを再度読み込み
+                    </a>
+                </div>
+
+                <div class="error-details">
+                    <h3><i class="fas fa-info-circle"></i> エラー続く場合</h3>
+                    <ul>
+                        <li>ブラウザのキャッシュをクリアしてみてください</li>
+                        <li>別のブラウザで試してみてください</li>
+                        <li>しばらく時間をおいてから再度アクセスしてください</li>
+                        <li>問題が継続する場合は、システム管理者にお問い合わせください</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+ </body>
+ </html>
