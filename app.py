@@ -32,12 +32,13 @@ def load_car_data():
     # 数値データの型変換
     for col in ['価格(万円)', '燃費(km/L)', '自動車税(円)', '乗車定員']:
         if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
+            df[col] = pd.to_numeric(df[col], errors='coerce') #pd.to_numeric()で数値に変換 #errors='coerce'により、変換できないデータはNaN（欠損値）になる
     
     # 不足データを適切な形式で埋める
     df['ボディタイプ'].fillna('不明', inplace=True)
     df['駆動方式'].fillna('不明', inplace=True)
     df['燃料の種類'].fillna('ガソリン', inplace=True)
+          #fillna()で空白のデータを適切な値で埋める #データが不完全でもアプリが正常に動作するようにする
 
     return df.to_dict(orient="records")  # 辞書型リストに変換
 

@@ -1,1 +1,89 @@
 <!-- 404エラーページ（未実装） -->
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ページが見つかりません - AI自動車推薦システム</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .error-icon {
+            font-size: 8rem;
+            color: #95a5a6;
+            margin-bottom: 30px;
+        }
+        .error-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .error-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .error-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .error-button:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+        .error-button.secondary {
+            background-color: #95a5a6;
+        }
+        .error-button.secondary:hover {
+            background-color: #7f8c8d;
+        }
+    </style>
+ </head>
+ <body>
+    <div class="container">
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+
+            <h1 class="error-title">404 - ページが見つかりません</h1>
+
+            <p class="error-message">
+                お探しのページは存在しないか、削除された可能性があります。<br>
+                URLを確認していただくか、以下のリンクから目的のページにアクセスしてください。
+            </p>
+
+            <div class="error-actions">
+                <a href="/" class="error-button">
+                    <i class="fas fa-home"></i>
+                    トップページに戻る
+                </a>
+                <a href="javascript:history.back()" class="error-button secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    前のページに戻る
+                </a>
+            </div>
+        </div>
+    </div>
+ </body>
+ </html>
