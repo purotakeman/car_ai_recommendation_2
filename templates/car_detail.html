@@ -1,1 +1,614 @@
 <!-- 車両詳細ページのHTML -->
+ <!DOCTYPE html>
+ <html lang="ja">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ car['メーカー']}} {{ car['車種'] }}の詳細情報 - AI自動車診断システム">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="{{ car['メーカー'] }} {{ car['車種'] }} - AI自動車推薦システム">
+    <meta property="og:description" content="{{ car['メーカー'] }} {{ car['車種']}}の詳細スペック、価格、燃費など総合情報">
+    <meta property="og:type" content="website">
+    <title>{{ car['メーカー'] }} {{ car['車種'] }} - AI自動車診断システム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/detail.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+ </head>
+ <body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> トップページに戻る</a>
+            <h1><i class="fas fa-car"></i> AI自動車推薦システム</h1>
+            <p class="tagline">あなたにピッタリの車を見つけます</p>
+        </header>
+
+        <div class="detail-section">
+            <div class="car-detail-header">
+                <h2>{{ car['メーカー'] }} {{ car['車種'] }}</h2>
+                <div class="car-actions">
+                    <button class="action-button favorite-button" data-car-id="{{ car['id'] }}">
+                        <i class="far fa-heart"></i> お気に入り追加
+                    </button>
+                    <button class="action-button share-button">
+                        <i class="fas fa-share-alt"></i> シェア
+                    </button>
+                </div>
+            </div>
+
+            <div class="car-detail-content">
+                <div class="car-overview">
+                    <!-- 車の画像があれば表示、なければプレースホルダー -->
+                     <img src="{{ url_for('static', filename='images/car_placeholder.jpg') }}" alt="{{ car['メーカー'] }} {{ car['車種'] }}" onerror="this.style.display='none'">
+                </div>
+
+                <div class="car-summary">
+                    <div class="summary-row">
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-yen-sign"></i> 新車価格</div>
+                            <div class="summary-value highlight">{{ format_currency(car['価格(万円)']) }}万円</div>
+                        </div>
+                        {% if car.get('中古相場(万円)') %}
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-recycle"></i> 中古相場</div>
+                            <div class="summary-value">{{ car['中古相場(万円)'] }}万円</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="summary-row">
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-car-side"></i> ボディタイプ</div>
+                            <div class="summary-value">{{ car['ボディタイプ'] }}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-cog"></i> 駆動方式</div>
+                            <div class="summary-value">{{ car['駆動方式'] }}</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        {% if car.get('燃費(km/L)') %}
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-gas-pump"></i> 燃費</div>
+                            <div class="summary-value">{{ car['燃費(km/L)'] }}km/L</div>
+                        </div>
+                        {% endif %}
+                        {% if car.get('燃料の種類') %}
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-battery-half"></i> 燃料タイプ</div>
+                            <div class="summary-value fuel-type-{{ car['燃料の種類'] }}">{{ car['燃料の種類'] }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if car.get('乗車定員') %}
+                    <div class="summary-row">
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-users"></i> 乗車定員</div>
+                            <div class="summary-value">{{ car['乗車定員'] }}人</div>
+                        </div>
+                        {% if car.get('自動車税(円)') %}
+                        <div class="summary-item">
+                            <div class="summary-label"><i class="fas fa-receipt"></i> 自動車税(年間)</div>
+                            <div class="summary-value">{{ format_currency(car['自動車税(円)']) }}円</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if car.get('サイズ(mm)') %}
+                    <div class="summary-row">
+                        <div class="summary-item full-width">
+                            <div class="summary-label"><i class="fas fa-ruler-combined"></i> サイズ(全長×全幅×全高)</div>
+                            <div class="summary-value">{{ car['サイズ(mm)'] }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+             <!-- 車両の特徴と評価 -->
+            <div class="car-evaluation">
+                <h3><i class="fas fa-star"></i> この車の特徴と評価</h3>
+
+                <div class="car-evaluation-content">
+                    <div class="strengths">
+                        <h4>長所</h4>
+                        <ul class="strength-list">
+                            <!-- ボディタイプに基づいた長所 -->
+                            {% if car['ボディタイプ'] == 'SUV' %}
+                            <li><i class="fas fa-check"></i> 悪路や雪道でも走行性能が高い</li>
+                            <li><i class="fas fa-check"></i> 視界が広く運転しやすい</li>
+                            <li><i class="fas fa-check"></i> 大きな荷物も積みやすい</li>
+                            {% elif car['ボディタイプ'] == 'ハッチバック' %}
+                            <li><i class="fas fa-check"></i> コンパクトで駐車がしやすい</li>
+                            <li><i class="fas fa-check"></i> 燃費が良い車種が多い</li>
+                            <li><i class="fas fa-check"></i> 荷室が使いやすい</li>
+                            {% elif car['ボディタイプ'] == '軽自動車' %}
+                            <li><i class="fas fa-check"></i> 税金や維持費が安い</li>
+                            <li><i class="fas fa-check"></i> 狭い道でも取り回しが良い</li>
+                            <li><i class="fas fa-check"></i> 燃費が良い</li>
+                            {% elif car['ボディタイプ'] == 'オープンカー' %}
+                            <li><i class="fas fa-check"></i> 開放感のある走行が楽しめる</li>
+                            <li><i class="fas fa-check"></i> デザイン性が高い</li>
+                            <li><i class="fas fa-check"></i> 爽快な走行フィーリング</li>
+                            {% elif car['ボディタイプ'] == 'セダン' %}
+                            <li><i class="fas fa-check"></i> 乗り心地が良い</li>
+                            <li><i class="fas fa-check"></i> 静粛性に優れている</li>
+                            <li><i class="fas fa-check"></i> 上質な内装と装備</li>
+                            {% elif car['ボディタイプ'] == 'ミニバン' %}
+                            <li><i class="fas fa-check"></i> 大人数での移動に最適</li>
+                            <li><i class="fas fa-check"></i> 大容量の荷室空間</li>
+                            <li><i class="fas fa-check"></i> ファミリー向けの便利機能が充実</li>
+                            {% else %}
+                            <li><i class="fas fa-check"></i> バランスの取れた走行性能</li>
+                            <li><i class="fas fa-check"></i> 使い勝手の良い車内空間</li>
+                            <li><i class="fas fa-check"></i> 様々なシーンで活躍する汎用性</li>
+                            {% endif %}
+                            
+                            <!-- 駆動方式に基づいた長所 -->
+                            {% if car['駆動方式'] == '4WD' %}
+                            <li><i class="fas fa-check"></i> 雪道や悪路でも安定した走行</li>
+                            {% endif %}
+                            
+                            <!-- 燃料タイプに基づいた長所 -->
+                            {% if car['燃料の種類'] == 'ハイブリッド' %}
+                            <li><i class="fas fa-check"></i> 低燃費で経済的</li>
+                            <li><i class="fas fa-check"></i> 排出ガスが少なく環境に優しい</li>
+                            {% elif car['燃料の種類'] == 'EV' %}
+                            <li><i class="fas fa-check"></i> 走行中のCO2排出ゼロ</li>
+                            <li><i class="fas fa-check"></i> 静かな走行と力強い加速</li>
+                            <li><i class="fas fa-check"></i> 充電コストが安い</li>
+                            {% elif car['燃料の種類'] == 'PHEV' %}
+                            <li><i class="fas fa-check"></i> 短距離はEVモードで経済的に走行可能</li>
+                            <li><i class="fas fa-check"></i> 長距離走行時も安心のエンジン搭載</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="weaknesses">
+                        <h4>注意点</h4>
+                        <ul class="weakness-list">
+                            <!-- ボディタイプに基づいた弱点 -->
+                            {% if car['ボディタイプ'] == 'SUV' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 燃費が他のボディタイプに比べて劣る場合がある</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 車高が高いため駐車場によっては制限がある</li>
+                            {% elif car['ボディタイプ'] == 'ハッチバック' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 後部座席の居住性がセダンより劣る場合がある</li>
+                            {% elif car['ボディタイプ'] == '軽自動車' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 高速走行時の安定性が大型車より劣る</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 荷室や居住性に制限がある</li>
+                            {% elif car['ボディタイプ'] == 'オープンカー' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 雨天時や冬場は運転に制限がある</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 荷室スペースが限られている</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 維持費が高い場合が多い</li>
+                            {% elif car['ボディタイプ'] == 'セダン' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 荷室の開口部が狭い場合がある</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 後部座席へのアクセスがやや不便</li>
+                            {% elif car['ボディタイプ'] == 'ミニバン' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 燃費が他のボディタイプより劣る</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 車体が大きく駐車や狭い道での運転が困難</li>
+                            {% endif %}
+                            
+                            <!-- 駆動方式に基づいた弱点 -->
+                            {% if car['駆動方式'] == '4WD' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 2WDに比べて燃費が劣る傾向がある</li>
+                            {% endif %}
+                            
+                            <!-- 燃料タイプに基づいた弱点 -->
+                            {% if car['燃料の種類'] == 'ハイブリッド' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 初期コストが通常のガソリン車より高い</li>
+                            {% elif car['燃料の種類'] == 'EV' %}
+                            <li><i class="fas fa-exclamation-circle"></i> 充電インフラの整備状況による制約がある</li>
+                            <li><i class="fas fa-exclamation-circle"></i> 長距離走行に不安がある場合も</li>
+                            {% elif car['燃料の種類'] == 'PHEV' %}
+                            <li><i class="fas fa-exclamation-circle"></i> バッテリー容量の関係でEVモードの走行距離が限られる</li>
+                            <li><i class="fas fa-exclamation-circle"></i> システムが複雑で修理費が高額になる可能性</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 総評と推薦理由 -->
+            <div class="car-recommendation">
+                <h3><i class="fas fa-thumbs-up"></i> 総評</h3>
+
+                <div class="recommendation-text">
+                    <p>{{ car['メーカー'] }} {{ car['車種'] }}は
+                    {% if car['ボディタイプ'] == 'SUV' %}
+                        アウトドア好きや家族での使用に適した車です。高い走行安定性と大きな荷室を備え、様々なシーンで活躍します。
+                    {% elif car['ボディタイプ'] == 'ハッチバック' %}
+                        街中での取り回しの良さと実用性を兼ね備えたバランスの取れた車です。日常使いに最適で、無駄のない設計が特徴です。
+                    {% elif car['ボディタイプ'] == '軽自動車' %}
+                        コンパクトさと経済性を重視する方に最適です。維持費の安さと小回りの良さが魅力で、特に都市部での使用に向いています。
+                    {% elif car['ボディタイプ'] == 'オープンカー' %}
+                        ドライブを楽しみたい方向けの車です。開放感のある走行体験とスタイリッシュなデザインが特徴で、休日のレジャーに最適です。
+                    {% elif car['ボディタイプ'] == 'セダン' %}
+                        上質な乗り心地と静粛性を求める方におすすめです。ビジネスシーンでの使用にも適した品格のある車です。
+                    {% elif car['ボディタイプ'] == 'ミニバン' %}
+                        大家族や多人数での移動が多い方に最適です。広い室内空間と便利な機能で、快適な移動をサポートします。
+                    {% else %}
+                        バランスの取れた性能と使い勝手の良さが特徴の車です。様々な用途に対応できる汎用性を備えています。
+                    {% endif %}
+                    
+                    {% if car['駆動方式'] == '4WD' %}
+                        四輪駆動により、雪道や悪路でも安心して運転できます。
+                    {% endif %}
+                    
+                    {% if car['燃料の種類'] == 'ハイブリッド' %}
+                        ハイブリッドシステムによる優れた燃費性能で、経済的な運転が可能です。
+                    {% elif car['燃料の種類'] == 'EV' %}
+                        電気自動車ならではのゼロエミッションと静粛性が魅力です。環境意識の高い方にお勧めします。
+                    {% elif car['燃料の種類'] == 'PHEV' %}
+                        プラグインハイブリッドならではの柔軟な走行モードで、短距離も長距離も対応できます。
+                    {% endif %}
+                    </p>
+                    
+                    {% if car.get('推薦スコア') %}
+                    <div class="recommendation-score">
+                        <span class="score-label">AI推薦スコア</span>
+                        <div class="score-bar">
+                            <div class="score-value" style="width: {{ car['推薦スコア'] }}%;">{{ car['推薦スコア'] }}/100</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+             <!-- タブセクション：詳細情報 -->
+            <div class="car-detail-tabs">
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="spec">詳細スペック</button>
+                    <button class="tab-button" data-tab="cost">維持費試算</button>
+                    <button class="tab-button" data-tab="reviews">レビュー・評価</button>
+                </div>
+
+                <div class="tab-content active" id="spec-tab">
+                    <table class="spec-table">
+                        <tr>
+                            <th>項目</th>
+                            <th>詳細</th>
+                        </tr>
+                        <tr>
+                            <td>メーカー</td>
+                            <td>{{ car['メーカー'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>車種</td>
+                            <td>{{ car['車種'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>ボディタイプ</td>
+                            <td>{{ car['ボディタイプ'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>駆動方式</td>
+                            <td>{{ car['駆動方式'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>新車価格</td>
+                            <td>{{ format_currency(car['価格(万円)']) }}万円</td>
+                        </tr>
+                        {% if car.get('排気量') %}
+                        <tr>
+                            <td>排気量</td>
+                            <td>{{ car['排気量'] }}cc</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('燃費(km/L)') %}
+                        <tr>
+                            <td>燃費</td>
+                            <td>{{ car['燃費(km/L)'] }}km/L</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('燃料の種類') %}
+                        <tr>
+                            <td>燃料タイプ</td>
+                            <td>{{ car['燃料の種類'] }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('自動車税(円)') %}
+                        <tr>
+                            <td>自動車税(年間)</td>
+                            <td>{{ format_currency(car['自動車税(円)']) }}円</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('乗車定員') %}
+                        <tr>
+                            <td>乗車定員</td>
+                            <td>{{ car['乗車定員'] }}人</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('サイズ(mm)') %}
+                        <tr>
+                            <td>サイズ(全長×全幅×全高)</td>
+                            <td>{{ car['サイズ(mm)'] }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('中古相場(万円)') %}
+                        <tr>
+                            <td>中古相場</td>
+                            <td>{{ car['中古相場(万円)'] }}万円</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('年式') %}
+                        <tr>
+                            <td>年式</td>
+                            <td>{{ car['年式'] }}年</td>
+                        </tr>
+                        {% endif %}
+                        {% if car.get('モデル') %}
+                        <tr>
+                            <td>グレード</td>
+                            <td>{{ car['モデル'] }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <div class="tab-content" id="cost-tab">
+                    <h4>5年間の維持費シミュレーション</h4>
+                    
+                    <div class="cost-simulation">
+                        <table class="cost-table">
+                            <tr>
+                                <th>項目</th>
+                                <th>概算費用(5年)</th>
+                                <th>備考</th>
+                            </tr>
+                            <tr>
+                                <td>自動車税</td>
+                                <td>{{ format_currency(car.get('自動車税(円)', 0) * 5) }}円</td>
+                                <td>年間 {{ format_currency(car.get('自動車税(円)', 0)) }}円 × 5年</td>
+                            </tr>
+                            <tr>
+                                <td>車検費用</td>
+                                <td>{{ format_currency(150000) }}円</td>
+                                <td>新車登録から3年目と5年目の車検費用概算</td>
+                            </tr>
+                            <tr>
+                                <td>自動車保険</td>
+                                <td>{{ format_currency(300000) }}円</td>
+                                <td>任意保険 年間約6万円 × 5年</td>
+                            </tr>
+                            <tr>
+                                <td>燃料費</td>
+                                {% if car.get('燃費(km/L)') and car.get('燃料の種類') %}
+                                    {% if car['燃料の種類'] == 'EV' %}
+                                    <td>{{ format_currency(120000) }}円</td>
+                                    <td>電気代 月2,000円 × 60ヶ月</td>
+                                    {% elif car['燃料の種類'] == 'ハイブリッド' or car['燃料の種類'] == 'PHEV' %}
+                                    <td>{{ format_currency(420000) }}円</td>
+                                    <td>年間10,000km走行想定 燃費{{ car['燃費(km/L)'] }}km/L</td>
+                                    {% else %}
+                                    <td>{{ format_currency(600000) }}円</td>
+                                    <td>年間10,000km走行想定 燃費{{ car['燃費(km/L)'] }}km/L</td>
+                                    {% endif %}
+                                {% else %}
+                                <td>{{ format_currency(600000) }}円</td>
+                                <td>年間10,000km走行想定</td>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td>メンテナンス費</td>
+                                <td>{{ format_currency(250000) }}円</td>
+                                <td>オイル交換や消耗品交換など</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>合計</td>
+                                {% if car.get('燃料の種類') == 'EV' %}
+                                <td>{{ format_currency(car.get('自動車税(円)', 0) * 5 + 150000 + 300000 + 120000 + 250000) }}円</td>
+                                {% elif car.get('燃料の種類') == 'ハイブリッド' or car.get('燃料の種類') == 'PHEV' %}
+                                <td>{{ format_currency(car.get('自動車税(円)', 0) * 5 + 150000 + 300000 + 420000 + 250000) }}円</td>
+                                {% else %}
+                                <td>{{ format_currency(car.get('自動車税(円)', 0) * 5 + 150000 + 300000 + 600000 + 250000) }}円</td>
+                                {% endif %}
+                                <td>車両本体価格を除く</td>
+                            </tr>
+                        </table>
+                        
+                        <div class="cost-note">
+                            <p><i class="fas fa-info-circle"></i> このシミュレーションは一般的な利用条件に基づく概算です。実際の維持費は走行距離や使用状況により異なります。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="reviews-tab">
+                    <div class="reviews-container">
+                        <div class="average-rating">
+                            <div class="rating-score">
+                                <span class="big-score">4.2</span>
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                <span class="review-count">24件のレビュー</span>
+                            </div>
+
+                            <div class="rating-breakdown">
+                                <div class="rating-category">
+                                    <span class="category-label">乗り心地</span>
+                                        <div class="rating-bar">
+                                            <div class="rating-value" style="width: 85%;"></div>
+                                        </div>
+                                    <span class="rating-number">4.3</span>
+                                </div>
+                                <div class="rating-category">
+                                    <span class="category-label">燃費</span>
+                                    <div class="rating-bar">
+                                        <div class="rating-value" style="width: 80%;"></div>
+                                    </div>
+                                    <span class="rating-number">4.0</span>
+                                </div>
+                                <div class="rating-category">
+                                    <span class="category-label">使い勝手</span>
+                                    <div class="rating-bar">
+                                        <div class="rating-value" style="width: 90%;"></div>
+                                    </div>
+                                    <span class="rating-number">4.5</span>
+                                </div>
+                                <div class="rating-category">
+                                    <span class="category-label">デザイン</span>
+                                    <div class="rating-bar">
+                                        <div class="rating-value" style="width: 88%;"></div>
+                                    </div>
+                                    <span class="rating-number">4.4</span>
+                                </div>
+                                <div class="rating-category">
+                                    <span class="category-label">コスパ</span>
+                                    <div class="rating-bar">
+                                        <div class="rating-value" style="width: 76%;"></div>
+                                    </div>
+                                    <span class="rating-number">3.8</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="review-list">
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span class="reviewer-name">田中さん</span>
+                                    </div>
+                                    <div class="review-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <span class="review-date">2025年3月15日</span>
+                                    </div>
+                                </div>
+                                <div class="review-content">
+                                    <p>購入して半年ですが、大変満足しています。特に燃費の良さと走行安定性が気に入っています。家族でのレジャーにも十分なスペースがあり、使い勝手も良好です。少し価格は高めでしたが、その価値はあると思います。</p>
+                                </div>
+                            </div>
+
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span class="reviewer-name">佐藤さん</span>
+                                    </div>
+                                    <div class="review-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                        <span class="review-date">2025年2月8日</span>
+                                    </div>
+                                </div>
+                                <div class="review-content">
+                                    <p>デザインが気に入って購入しましたが、実用性も高く満足しています。ただ、後部座席はやや狭く感じることがあります。操作性は良好で、特に駐車時の取り回しがしやすいです。総合的には良い買い物だったと思います。</p>
+                                </div>
+                            </div>
+
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span class="reviewer-name">山田さん</span>
+                                    </div>
+                                    <div class="review-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                        <span class="review-date">2025年1月22日</span>
+                                    </div>
+                                </div>
+                                <div class="review-content">
+                                    <p>燃費は期待通りですが、乗り心地がやや固く感じます。長距離運転では少し疲れが出ます。内装のクオリティは価格相応で、特に不満はありません。維持費は比較的抑えられており、経済的な選択だったと思います。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="more-reviews">
+                            <button class="more-reviews-button">レビューをもっと見る</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 関連車両セクション -->
+            {% if related_cars %}
+            <div class="related-cars">
+                <h3><i class="fas fa-car-alt"></i> 関連する車両</h3>
+                <div class="related-cars-list">
+                    {% for related_car in related_cars %}
+                    <div class="related-car-item">
+                        <div class="related-car-header">
+                            <h4>{{ related_car['メーカー'] }} {{ related_car['車種'] }}</h4>
+                        </div>
+                        <div class="related-car-info">
+                            <div class="info-row">
+                                <span class="label">タイプ:</span>
+                                <span class="value">{{ related_car['ボディタイプ'] }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">価格:</span>
+                                <span class="value">{{ format_currency(related_car['価格(万円)']) }}万円</span>
+                            </div>
+                            {% if related_car.get('燃費(km/L)') %}
+                            <div class="info-row">
+                                <span class="label">燃費:</span>
+                                <span class="value">{{ related_car['燃費(km/L)'] }}km/L</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="/car/{{ related_car['id'] }}" class="related-car-link">詳細を見る <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 戻るボタン -->
+            <div class="back-section">
+                <a href="/" class="back-button"><i class="fas fa-arrow-left"></i> 車検索に戻る</a>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AI自動車診断について</h3>
+                    <p>当サイトは車選びをAIでサポートする無料サービスです。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>お問い合わせ</h3>
+                    <p><i class="fas fa-envelope"></i> info@example.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>フォローする</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI自動車診断 - あなたに最適な車を見つけよう</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/detail.js') }}"></script>
+ </body>
+ </html>
