@@ -8,7 +8,6 @@ from datetime import datetime
 from utils.recommendation import calculate_recommendation_scores
 
 app = Flask(__name__)
-
 # CSVデータを読み込む
 def load_car_data():
     try:
