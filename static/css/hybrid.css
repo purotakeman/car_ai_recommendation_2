@@ -1,0 +1,714 @@
+/**
+ * hybrid.css - ハイブリッド診断システム用CSS
+ * 事実情報（選択肢）+ 嗜好情報（5段階評価）のスタイル
+ */
+
+/* ==========================================================================
+   ハイブリッド診断モード全体のスタイル
+   ========================================================================== */
+
+.hybrid-diagnosis-mode {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: var(--spacing-xl);
+    border-radius: 16px;
+    margin-bottom: var(--spacing-lg);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.hybrid-diagnosis-mode::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(50px, -50px);
+}
+
+.diagnosis-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    position: relative;
+    z-index: 1;
+}
+
+.diagnosis-header h3 {
+    color: white;
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.6rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.diagnosis-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   プログレスバー
+   ========================================================================== */
+
+.diagnosis-progress {
+    margin-bottom: var(--spacing-xl);
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.2);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    height: 100%;
+    width: 0%;
+    transition: width 0.8s ease;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.progress-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ==========================================================================
+   診断ステップ
+   ========================================================================== */
+
+.diagnosis-step {
+    display: none;
+    animation: fadeInStep 0.6s ease-out;
+}
+
+.diagnosis-step.active {
+    display: block;
+}
+
+.step-title {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.step-subtitle {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   質問グループ（事実情報用）
+   ========================================================================== */
+
+.question-group {
+    background: rgba(255, 255, 255, 0.15);
+    padding: var(--spacing-lg);
+    border-radius: 12px;
+    margin-bottom: var(--spacing-lg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.question-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: var(--spacing-sm);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.question-title i {
+    margin-right: var(--spacing-sm);
+    color: #4CAF50;
+}
+
+.question-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   選択肢カード（事実情報用）
+   ========================================================================== */
+
+.choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.choice-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+}
+
+.choice-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.6s;
+}
+
+.choice-card:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #4CAF50;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.choice-card:hover::before {
+    left: 100%;
+}
+
+.choice-card input[type="radio"] {
+    display: none;
+}
+
+.choice-card.selected {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-color: #4CAF50;
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    transform: translateY(-3px);
+}
+
+.choice-content {
+    text-align: center;
+    color: white;
+}
+
+.choice-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+    color: #4CAF50;
+    transition: all 0.3s ease;
+}
+
+.choice-card.selected .choice-icon {
+    color: white;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.choice-text {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.3;
+}
+
+.choice-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4;
+}
+
+.choice-card.selected .choice-desc {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ==========================================================================
+   評価質問グループ（嗜好情報用）
+   ========================================================================== */
+
+.rating-question-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.rating-question {
+    background: rgba(255, 255, 255, 0.15);
+    padding: var(--spacing-lg);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rating-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.rating-icon {
+    font-size: 1.3rem;
+    color: #4CAF50;
+    margin-right: var(--spacing-sm);
+}
+
+.rating-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.rating-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   5段階評価スケール
+   ========================================================================== */
+
+.rating-scale {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-lg);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.rating-options {
+    display: flex;
+    justify-content: space-between;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.rating-option {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    backdrop-filter: blur(5px);
+}
+
+.rating-option:hover {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.rating-option input[type="radio"] {
+    display: none;
+}
+
+.rating-option.selected {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-color: #4CAF50;
+    color: white;
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: scale(1.05);
+}
+
+.rating-number {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ==========================================================================
+   ナビゲーション
+   ========================================================================== */
+
+.diagnosis-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-xl);
+    position: relative;
+    z-index: 1;
+}
+
+.diagnosis-nav-button {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.diagnosis-nav-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.diagnosis-nav-button:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.diagnosis-nav-button:hover::before {
+    left: 100%;
+}
+
+.diagnosis-nav-button:active {
+    transform: translateY(0);
+}
+
+.diagnosis-nav-button:disabled {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.diagnosis-nav-button.secondary {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+}
+
+.diagnosis-nav-button.secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ==========================================================================
+   結果画面
+   ========================================================================== */
+
+.diagnosis-results {
+    text-align: center;
+    padding: var(--spacing-lg);
+}
+
+.user-profile-result {
+    background: rgba(255, 255, 255, 0.15);
+    padding: var(--spacing-xl);
+    border-radius: 12px;
+    margin-bottom: var(--spacing-xl);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-type-display {
+    margin-bottom: var(--spacing-lg);
+}
+
+.profile-label {
+    display: block;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: var(--spacing-sm);
+}
+
+.profile-type-text {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #4CAF50;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.profile-description-text {
+    font-size: 1.1rem;
+    color: white;
+    line-height: 1.6;
+    margin-bottom: var(--spacing-lg);
+}
+
+.profile-recommendations {
+    background: rgba(76, 175, 80, 0.2);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    border-left: 4px solid #4CAF50;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+}
+
+.diagnosis-complete-button {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.diagnosis-complete-button:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+}
+
+/* ==========================================================================
+   モード切り替え
+   ========================================================================== */
+
+.mode-toggle-section {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
+.mode-toggle-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+}
+
+.mode-toggle-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ==========================================================================
+   アニメーション
+   ========================================================================== */
+
+@keyframes fadeInStep {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+    50% {
+        box-shadow: 0 6px 30px rgba(76, 175, 80, 0.6);
+    }
+}
+
+.choice-card.selected {
+    animation: pulseGlow 2s infinite;
+}
+
+.rating-option.selected {
+    animation: pulseGlow 2s infinite;
+}
+
+/* ==========================================================================
+   レスポンシブデザイン
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .hybrid-diagnosis-mode {
+        padding: var(--spacing-lg);
+        margin-left: calc(var(--spacing-md) * -1);
+        margin-right: calc(var(--spacing-md) * -1);
+        border-radius: 12px;
+    }
+
+    .choice-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .choice-card {
+        padding: var(--spacing-md);
+    }
+
+    .choice-icon {
+        font-size: 1.5rem;
+    }
+
+    .choice-text {
+        font-size: 1rem;
+    }
+
+    .diagnosis-navigation {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .diagnosis-nav-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .rating-options {
+        max-width: 280px;
+    }
+
+    .rating-option {
+        width: 40px;
+        height: 40px;
+    }
+
+    .rating-number {
+        font-size: 1rem;
+    }
+
+    .step-title {
+        font-size: 1.2rem;
+    }
+
+    .question-title {
+        font-size: 1.1rem;
+    }
+
+    .rating-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hybrid-diagnosis-mode {
+        padding: var(--spacing-md);
+    }
+
+    .question-group,
+    .rating-question {
+        padding: var(--spacing-md);
+    }
+
+    .choice-card {
+        padding: var(--spacing-sm);
+    }
+
+    .choice-icon {
+        font-size: 1.3rem;
+    }
+
+    .choice-text {
+        font-size: 0.9rem;
+    }
+
+    .choice-desc {
+        font-size: 0.8rem;
+    }
+
+    .rating-options {
+        max-width: 250px;
+    }
+
+    .rating-option {
+        width: 35px;
+        height: 35px;
+    }
+
+    .rating-number {
+        font-size: 0.9rem;
+    }
+
+    .diagnosis-nav-button {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.9rem;
+    }
+
+    .profile-type-text {
+        font-size: 1.5rem;
+    }
+}
+
+/* ==========================================================================
+   ダークモード対応（将来の拡張用）
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .hybrid-diagnosis-mode {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    }
+
+    .choice-card.selected {
+        background: linear-gradient(135deg, #27ae60, #229954);
+    }
+
+    .rating-option.selected {
+        background: linear-gradient(135deg, #27ae60, #229954);
+    }
+}
+
+/* ==========================================================================
+   プリント用スタイル
+   ========================================================================== */
+
+@media print {
+    .hybrid-diagnosis-mode {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+
+    .diagnosis-navigation,
+    .mode-toggle-section {
+        display: none !important;
+    }
+
+    .choice-card,
+    .rating-question {
+        background: #f8f9fa !important;
+        border: 1px solid #ccc !important;
+    }
+}

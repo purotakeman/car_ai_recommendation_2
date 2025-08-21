@@ -1,22 +1,25 @@
-<!-- メインページのHTML（検索・一覧表示） -->
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
-        <meta name="keywords" content="車選び,AI推薦,自動車診断,最適な車,車探し">
-        <meta name="robots" content="index, follow">
-        <meta property="og:title" content="AI自動車診断 - あなたに最適な車を見つけましょう">
-        <meta property="og:description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
-        <meta property="og:type" content="website">
-        <title>AI自動車診断 - あなたに最適な車を見つけましょう</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-        <!-- FontAwesomeアイコンを追加（CDNからロード） -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <!-- ファビコン設定 -->
-        <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
+    <meta name="keywords" content="車選び,AI推薦,自動車診断,最適な車,車探し">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="AI自動車診断 - あなたに最適な車を見つけましょう">
+    <meta property="og:description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
+    <meta property="og:type" content="website">
+    <title>AI自動車診断 - あなたに最適な車を見つけましょう</title>
+    
+    <!-- CSSファイルの読み込み（既存のファイル構造を使用） -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hybrid.css') }}">
+    <!-- FontAwesomeアイコン -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- ファビコン -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
 <body>
     <div class="container">
         <header>
@@ -25,8 +28,368 @@
         </header>
         
         <div class="search-section" id="search-form">
-            <h2><i class="fas fa-search"></i> 条件を設定する</h2>
-            <form method="POST" action="/" id="car-filter-form">
+            <h2><i class="fas fa-search"></i> あなたにピッタリの車を見つけましょう</h2>
+            
+            <!-- ハイブリッド診断モード -->
+            <div class="hybrid-diagnosis-mode" id="hybrid-diagnosis-mode">
+                <div class="diagnosis-header">
+                    <h3><i class="fas fa-brain"></i> スマート診断（おすすめ）</h3>
+                    <p class="diagnosis-subtitle">段階的な質問で、より精密にあなたに最適な車を見つけます</p>
+                    
+                    <!-- プログレスバー -->
+                    <div class="diagnosis-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="diagnosisProgressFill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="currentStepText">基本情報</span> 
+                            (<span id="stepCounter">1</span> / <span id="totalSteps">3</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ステップ1: 事実情報（選択肢形式） -->
+                <div class="diagnosis-step active" id="diagnosis-step-1">
+                    <h4 class="step-title">基本情報をお聞かせください</h4>
+                    
+                    <div class="question-group">
+                        <label class="question-title">
+                            <i class="fas fa-route"></i> 主な用途は何ですか？
+                        </label>
+                        <p class="question-subtitle">最も多く使う場面を選択してください</p>
+                        <div class="choice-grid">
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_purpose" value="family">
+                                <div class="choice-content">
+                                    <i class="fas fa-home choice-icon"></i>
+                                    <span class="choice-text">家族での外出</span>
+                                    <small class="choice-desc">お子様の送迎、家族旅行など</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_purpose" value="commute">
+                                <div class="choice-content">
+                                    <i class="fas fa-briefcase choice-icon"></i>
+                                    <span class="choice-text">通勤・通学</span>
+                                    <small class="choice-desc">毎日の移動手段として</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_purpose" value="leisure">
+                                <div class="choice-content">
+                                    <i class="fas fa-mountain choice-icon"></i>
+                                    <span class="choice-text">レジャー・趣味</span>
+                                    <small class="choice-desc">アウトドア、ドライブなど</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_purpose" value="business">
+                                <div class="choice-content">
+                                    <i class="fas fa-building choice-icon"></i>
+                                    <span class="choice-text">仕事・営業</span>
+                                    <small class="choice-desc">商談、配達、営業活動</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-title">
+                            <i class="fas fa-yen-sign"></i> ご予算はどの程度ですか？
+                        </label>
+                        <p class="question-subtitle">新車購入時の予算をお選びください</p>
+                        <div class="choice-grid">
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_budget" value="low">
+                                <div class="choice-content">
+                                    <i class="fas fa-coins choice-icon"></i>
+                                    <span class="choice-text">〜200万円</span>
+                                    <small class="choice-desc">コストパフォーマンス重視</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_budget" value="medium">
+                                <div class="choice-content">
+                                    <i class="fas fa-money-bill-wave choice-icon"></i>
+                                    <span class="choice-text">200〜400万円</span>
+                                    <small class="choice-desc">バランス重視</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_budget" value="high">
+                                <div class="choice-content">
+                                    <i class="fas fa-gem choice-icon"></i>
+                                    <span class="choice-text">400万円〜</span>
+                                    <small class="choice-desc">品質・装備重視</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <label class="question-title">
+                            <i class="fas fa-users"></i> 普段何人で乗ることが多いですか？
+                        </label>
+                        <p class="question-subtitle">最も頻繁な乗車人数を選択してください</p>
+                        <div class="choice-grid">
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_passengers" value="1-2">
+                                <div class="choice-content">
+                                    <i class="fas fa-user choice-icon"></i>
+                                    <span class="choice-text">1〜2人</span>
+                                    <small class="choice-desc">一人または夫婦での利用</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_passengers" value="3-4">
+                                <div class="choice-content">
+                                    <i class="fas fa-user-friends choice-icon"></i>
+                                    <span class="choice-text">3〜4人</span>
+                                    <small class="choice-desc">小家族での利用</small>
+                                </div>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="hybrid_passengers" value="5+">
+                                <div class="choice-content">
+                                    <i class="fas fa-users choice-icon"></i>
+                                    <span class="choice-text">5人以上</span>
+                                    <small class="choice-desc">大家族や多人数での利用</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ステップ2: 嗜好情報（5段階評価） -->
+                <div class="diagnosis-step" id="diagnosis-step-2">
+                    <h4 class="step-title">あなたの重視ポイントを教えてください</h4>
+                    <p class="step-subtitle">各項目について、どの程度重要かを5段階で評価してください</p>
+
+                    <div class="rating-question-group">
+                        <div class="rating-question">
+                            <div class="rating-header">
+                                <i class="fas fa-gas-pump rating-icon"></i>
+                                <div class="rating-title">燃費の良さ</div>
+                            </div>
+                            <div class="rating-description">燃料費を抑えたい気持ちの強さを教えてください</div>
+                            <div class="rating-scale">
+                                <div class="scale-labels">
+                                    <span>全く重要でない</span>
+                                    <span>とても重要</span>
+                                </div>
+                                <div class="rating-options">
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_fuel_importance" value="1">
+                                        <span class="rating-number">1</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_fuel_importance" value="2">
+                                        <span class="rating-number">2</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_fuel_importance" value="3">
+                                        <span class="rating-number">3</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_fuel_importance" value="4">
+                                        <span class="rating-number">4</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_fuel_importance" value="5">
+                                        <span class="rating-number">5</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-question">
+                            <div class="rating-header">
+                                <i class="fas fa-shield-alt rating-icon"></i>
+                                <div class="rating-title">安全性</div>
+                            </div>
+                            <div class="rating-description">安全装備や信頼性への重要度を教えてください</div>
+                            <div class="rating-scale">
+                                <div class="scale-labels">
+                                    <span>あまり気にしない</span>
+                                    <span>最重要項目</span>
+                                </div>
+                                <div class="rating-options">
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_safety_importance" value="1">
+                                        <span class="rating-number">1</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_safety_importance" value="2">
+                                        <span class="rating-number">2</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_safety_importance" value="3">
+                                        <span class="rating-number">3</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_safety_importance" value="4">
+                                        <span class="rating-number">4</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_safety_importance" value="5">
+                                        <span class="rating-number">5</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-question">
+                            <div class="rating-header">
+                                <i class="fas fa-palette rating-icon"></i>
+                                <div class="rating-title">デザインの良さ</div>
+                            </div>
+                            <div class="rating-description">見た目やスタイリングへのこだわりを教えてください</div>
+                            <div class="rating-scale">
+                                <div class="scale-labels">
+                                    <span>機能重視</span>
+                                    <span>デザイン最優先</span>
+                                </div>
+                                <div class="rating-options">
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_design_importance" value="1">
+                                        <span class="rating-number">1</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_design_importance" value="2">
+                                        <span class="rating-number">2</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_design_importance" value="3">
+                                        <span class="rating-number">3</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_design_importance" value="4">
+                                        <span class="rating-number">4</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_design_importance" value="5">
+                                        <span class="rating-number">5</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-question">
+                            <div class="rating-header">
+                                <i class="fas fa-expand-arrows-alt rating-icon"></i>
+                                <div class="rating-title">広い室内空間</div>
+                            </div>
+                            <div class="rating-description">乗り心地や荷物の積みやすさを重視する度合いを教えてください</div>
+                            <div class="rating-scale">
+                                <div class="scale-labels">
+                                    <span>コンパクトで十分</span>
+                                    <span>広さ最優先</span>
+                                </div>
+                                <div class="rating-options">
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_space_importance" value="1">
+                                        <span class="rating-number">1</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_space_importance" value="2">
+                                        <span class="rating-number">2</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_space_importance" value="3">
+                                        <span class="rating-number">3</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_space_importance" value="4">
+                                        <span class="rating-number">4</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_space_importance" value="5">
+                                        <span class="rating-number">5</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-question">
+                            <div class="rating-header">
+                                <i class="fas fa-tools rating-icon"></i>
+                                <div class="rating-title">維持費の安さ</div>
+                            </div>
+                            <div class="rating-description">保険料、税金、メンテナンス費用を抑えたい度合いを教えてください</div>
+                            <div class="rating-scale">
+                                <div class="scale-labels">
+                                    <span>気にしない</span>
+                                    <span>とても重要</span>
+                                </div>
+                                <div class="rating-options">
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_maintenance_importance" value="1">
+                                        <span class="rating-number">1</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_maintenance_importance" value="2">
+                                        <span class="rating-number">2</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_maintenance_importance" value="3">
+                                        <span class="rating-number">3</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_maintenance_importance" value="4">
+                                        <span class="rating-number">4</span>
+                                    </label>
+                                    <label class="rating-option">
+                                        <input type="radio" name="hybrid_maintenance_importance" value="5">
+                                        <span class="rating-number">5</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ステップ3: 結果表示 -->
+                <div class="diagnosis-step" id="diagnosis-step-3">
+                    <div class="diagnosis-results">
+                        <h4 class="step-title">
+                            <i class="fas fa-check-circle"></i> 診断完了！
+                        </h4>
+                        
+                        <div class="user-profile-result" id="userProfileResult">
+                            <div class="profile-type-display">
+                                <span class="profile-label">あなたのタイプ:</span>
+                                <span class="profile-type-text" id="profileTypeText">分析中...</span>
+                            </div>
+                            <div class="profile-description-text" id="profileDescriptionText">
+                                お答えいただいた内容を分析しています...
+                            </div>
+                            <div class="profile-recommendations" id="profileRecommendations">
+                                <!-- 推薦理由がここに表示されます -->
+                            </div>
+                        </div>
+                        
+                        <div class="diagnosis-action">
+                            <button class="diagnosis-complete-button" onclick="executeHybridDiagnosis()">
+                                <i class="fas fa-car"></i> あなたに最適な車を見る
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ナビゲーション -->
+                <div class="diagnosis-navigation">
+                    <button class="diagnosis-nav-button secondary" id="hybridPrevBtn" onclick="previousHybridStep()" disabled>
+                        <i class="fas fa-chevron-left"></i> 前へ
+                    </button>
+                    <button class="diagnosis-nav-button" id="hybridNextBtn" onclick="nextHybridStep()">
+                        次へ <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 従来の詳細検索フォーム -->
+            <form method="POST" action="/" id="car-filter-form" style="display: none;">
+                <!-- 既存の詳細検索フォームをそのまま維持 -->
                 <div class="filter-groups">
                     <div class="filter-group">
                         <h3><i class="fas fa-truck-monster"></i> ボディタイプ</h3>
@@ -92,67 +455,58 @@
                     </div>
                 </div>
                 
-                <!-- 将来的に実装する機能 - コメントアウトのままですが、より説明的なコメントに変更 -->
-                <!-- 
-                以下はユーザーの好みを詳細に把握するための設定項目です。
-                この情報をもとに、より精度の高い車両推薦を行います。
-                バックエンド実装後に有効化してください。
-                -->
-                <!-- 
-                <div class="preferences-section">
-                    <h2><i class="fas fa-sliders-h"></i> あなたの重視ポイント</h2>
-                    <p class="hint">下記の項目の重要度を設定してください。車の推薦に影響します。</p>
-                    
-                    <div class="preference-sliders">
-                        <div class="preference-item">
-                            <label for="price-importance">価格の重要度</label>
-                            <input type="range" id="price-importance" name="price_importance" min="0" max="1" step="0.1" value="0.5">
-                            <span class="value-display">普通</span>
-                        </div>
-                        
-                        <div class="preference-item">
-                            <label for="fuel-economy-importance">燃費の重要度</label>
-                            <input type="range" id="fuel-economy-importance" name="fuel_economy_importance" min="0" max="1" step="0.1" value="0.3">
-                            <span class="value-display">やや低め</span>
-                        </div>
-                        
-                        <div class="preference-item">
-                            <label for="size-importance">サイズの重要度</label>
-                            <input type="range" id="size-importance" name="size_importance" min="0" max="1" step="0.1" value="0.2">
-                            <span class="value-display">低め</span>
-                        </div>
-                    </div>
-                    
-                    <div class="preference-radios">
-                        <h3>希望する車のサイズ</h3>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="preferred_size" value="small">
-                                <span>小型車</span>
-                                <small>コンパクトで扱いやすい</small>
-                            </label>
-                            <label>
-                                <input type="radio" name="preferred_size" value="medium" checked>
-                                <span>中型車</span>
-                                <small>バランスの取れたサイズ感</small>
-                            </label>
-                            <label>
-                                <input type="radio" name="preferred_size" value="large">
-                                <span>大型車</span>
-                                <small>広々とした室内空間</small>
-                            </label>
-                        </div>
-                    </div>
-                </div> 
-                -->
-                
                 <div class="form-actions">
                     <button type="submit" class="search-button"><i class="fas fa-search"></i> 車を診断する</button>
                     <button type="reset" class="reset-button"><i class="fas fa-redo"></i> リセット</button>
+                    <button type="button" class="toggle-mode-button" onclick="toggleSearchMode()">
+                        <i class="fas fa-brain"></i> スマート診断に戻る
+                    </button>
                 </div>
             </form>
+
+            <!-- モード切り替えボタン -->
+            <div class="mode-toggle-section">
+                <button type="button" class="mode-toggle-button" onclick="toggleSearchMode()">
+                    <i class="fas fa-sliders-h"></i> 詳細検索に切り替え
+                </button>
+            </div>
         </div>
         
+        <!-- ローディング表示 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>AI が最適な車を診断中...</p>
+        </div>
+        
+        <!-- 推薦結果の洞察表示 -->
+        {% if cars and show_recommendation_details %}
+        <div class="recommendation-insights">
+            <h3><i class="fas fa-lightbulb"></i> AI分析結果</h3>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <h4>検索結果</h4>
+                    <p class="profile-type">{{ cars|length }}台</p>
+                    <small>条件に合致した車両数</small>
+                </div>
+                <div class="insight-card">
+                    <h4>おすすめの理由</h4>
+                    {% if cars[0].get('推薦理由') %}
+                    <p style="font-size: 0.9rem;">{{ cars[0]['推薦理由'] }}</p>
+                    {% else %}
+                    <p style="font-size: 0.9rem;">総合的な評価に基づいて選出されました</p>
+                    {% endif %}
+                </div>
+                <div class="insight-card">
+                    <h4>平均予算</h4>
+                    {% set avg_price = (cars[:3]|map(attribute='価格(万円)')|map('float')|sum / 3)|round|int %}
+                    <p class="budget-info">{{ avg_price }}万円</p>
+                    <small>上位3台の平均価格</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- 既存の検索結果セクションをそのまま維持 -->
         <div class="results-section" id="results">
             <h2><i class="fas fa-list"></i> 検索結果 {% if cars %}<span class="result-count">({{ cars|length }}台)</span>{% endif %}</h2>
             
@@ -168,6 +522,7 @@
             </div>
             
             <div class="car-cards" id="car-results">
+                <!-- 既存の車両カード表示ロジックをそのまま維持 -->
                 {% for car in cars %}
                 <div class="car-card" data-price="{{ car['価格(万円)'] }}" data-fuel="{{ car['燃費(km/L)'] }}" data-score="{{ car.get('推薦スコア', 0) }}">
                     <div class="car-header">
@@ -244,9 +599,14 @@
                                 {% endif %}
                             </div>
                             {% endif %}
+                            
+                            {% if car.get('推薦理由') %}
+                            <div class="recommendation-reason">
+                                <i class="fas fa-star"></i> {{ car['推薦理由'] }}
+                            </div>
+                            {% endif %}
                         </div>
                         
-                        <!-- 詳細表示ボタンは将来的に実装 -->
                         <div class="car-actions">
                             <a href="/car/{{ car['id'] }}" class="action-button"><i class="fas fa-info-circle"></i> 詳細</a>
                             <button class="action-button secondary favorite-button" data-car-id="{{ car['id'] }}">
@@ -297,8 +657,10 @@
             <p>&copy; 2025 AI自動車診断 - あなたに最適な車を見つけよう</p>
         </div>
     </footer>
-</div>
 
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- JavaScript読み込み -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/enhanced.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/hybrid.js') }}"></script>
 </body>
 </html>

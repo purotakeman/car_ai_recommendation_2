@@ -250,7 +250,7 @@
                     <div class="recommendation-score">
                         <span class="score-label">AI推薦スコア</span>
                         <div class="score-bar">
-                            <div class="score-value" style="width: {{ car['推薦スコア'] }}%;">{{ car['推薦スコア'] }}/100</div>
+                            <div class="score-value" data-score="{{ car.get('推薦スコア', 0) }};">{{ car.get('推薦スコア', 0) }}/100</div>
                         </div>
                     </div>
                     {% endif %}
