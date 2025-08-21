@@ -1,0 +1,520 @@
+/**
+ * enhanced.css - AI自動車推薦システム 拡張機能用CSS
+ * 簡単診断機能、推薦結果表示、レスポンシブ対応など
+ */
+
+/* ==========================================================================
+   診断モード用スタイル
+   ========================================================================== */
+
+.diagnosis-mode {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: var(--spacing-xl);
+    border-radius: 12px;
+    margin-bottom: var(--spacing-lg);
+    display: none; /* 初期状態では非表示 */
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.diagnosis-mode.active {
+    display: block;
+    animation: slideIn 0.5s ease-out;
+}
+
+.diagnosis-mode h3 {
+    color: white;
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-size: 1.4rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.diagnosis-mode .hint {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.diagnosis-questions {
+    display: grid;
+    gap: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+}
+
+.question-group {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.question-group > label:first-child {
+    display: block;
+    font-weight: bold;
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.1rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.radio-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.radio-group label {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-sm);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.radio-group label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.radio-group label:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.radio-group label:hover::before {
+    left: 100%;
+}
+
+.radio-group input[type="radio"] {
+    margin-right: var(--spacing-sm);
+    accent-color: #4CAF50;
+}
+
+.radio-group input[type="radio"]:checked + span {
+    font-weight: bold;
+    color: #4CAF50;
+    text-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.diagnosis-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--spacing-xl);
+}
+
+.diagnosis-button {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.diagnosis-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.diagnosis-button:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.diagnosis-button:hover::before {
+    left: 100%;
+}
+
+.diagnosis-button:active {
+    transform: translateY(-1px);
+}
+
+.toggle-mode-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    backdrop-filter: blur(10px);
+}
+
+.toggle-mode-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ==========================================================================
+   推薦結果の洞察表示
+   ========================================================================== */
+
+.recommendation-insights {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: var(--spacing-lg);
+    border-radius: 12px;
+    margin-bottom: var(--spacing-lg);
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-insights::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+    opacity: 0.1;
+    border-radius: 50%;
+    transform: translate(30px, -30px);
+}
+
+.recommendation-insights h3 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+    font-size: 1.3rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.insight-card {
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+
+.insight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.insight-card h4 {
+    margin-bottom: var(--spacing-sm);
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profile-type {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+}
+
+.budget-info {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: var(--spacing-xs);
+}
+
+.recommendation-reason {
+    background: linear-gradient(135deg, #e8f5e8, #d4edda);
+    padding: var(--spacing-sm);
+    border-radius: 6px;
+    margin-top: var(--spacing-sm);
+    font-size: 0.9rem;
+    color: #2e7d32;
+    border-left: 3px solid #4caf50;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-reason::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 30%, rgba(76, 175, 80, 0.1) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.car-card:hover .recommendation-reason::before {
+    transform: translateX(100%);
+}
+
+/* ==========================================================================
+   ローディング状態
+   ========================================================================== */
+
+.loading {
+    display: none;
+    text-align: center;
+    padding: var(--spacing-xl);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    margin: var(--spacing-lg) 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.loading.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--spacing-md);
+}
+
+.loading p {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   アニメーション
+   ========================================================================== */
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ==========================================================================
+   既存要素の拡張
+   ========================================================================== */
+
+/* 車両カードのホバー効果強化 */
+.car-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.car-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.car-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* スコアバッジの改善 */
+.score-badge {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    animation: pulse 2s infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.score-badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* ==========================================================================
+   レスポンシブデザイン
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .radio-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .diagnosis-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .diagnosis-mode {
+        padding: var(--spacing-md);
+        margin-left: calc(var(--spacing-md) * -1);
+        margin-right: calc(var(--spacing-md) * -1);
+    }
+
+    .question-group {
+        padding: var(--spacing-sm);
+    }
+
+    .diagnosis-button,
+    .toggle-mode-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .diagnosis-mode {
+        border-radius: 8px;
+    }
+
+    .radio-group label {
+        padding: var(--spacing-xs);
+        font-size: 0.9rem;
+    }
+
+    .diagnosis-button {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 1rem;
+    }
+
+    .insight-card {
+        padding: var(--spacing-sm);
+    }
+
+    .profile-type,
+    .budget-info {
+        font-size: 1.1rem;
+    }
+}
+
+/* ==========================================================================
+   ダークモード対応（将来の拡張用）
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .recommendation-insights {
+        background: linear-gradient(135deg, #2d3748, #4a5568);
+        color: #e2e8f0;
+    }
+
+    .insight-card {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+
+    .loading {
+        background: rgba(45, 55, 72, 0.9);
+        color: #e2e8f0;
+    }
+}
+
+/* ==========================================================================
+   プリント用スタイル
+   ========================================================================== */
+
+@media print {
+    .diagnosis-mode,
+    .loading,
+    .diagnosis-actions,
+    .toggle-mode-button {
+        display: none !important;
+    }
+
+    .recommendation-insights {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+}

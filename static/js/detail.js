@@ -21,6 +21,13 @@ document.addEventListener('DOMContentLoaded', function() {
     setupReviews();
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.score-value[data-score]').forEach(el => {
+        const v = parseInt(el.dataset.score,10) || 0;
+        el.style.width = `${v}%`;
+    });
+});
+
 /**
  * タブ切り替え機能の設定
  */
