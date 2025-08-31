@@ -1,27 +1,51 @@
 <!DOCTYPE html>
-<!-- ブラウザにHTML5の仕様に従って作ったページをレンダリングするように指示する。古いブラウザの互換モードで表示されないように防ぐ -->
+ <!-- ブラウザにHTML5の仕様に従って作ったページをレンダリングするように指示する。古いブラウザの互換モードで表示 -->
 <html lang="ja">
     <!-- このWebページが日本語で書かれていることをブラウザや検索エンジンに伝えるHTML属性 -->
 <head>
-    <meta charset="UTF-8"><!-- 文字エンコードの指定。世界中の文字を表示できる標準的な文字コード -->
+    <meta charset="UTF-8">
+    <meta charset="UTF-8"><!-- 文字エンコードの指定。世界中の文字を表示できる標準的な文字コード  -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- レスポンシブデザインのための設定。webサイトを様々なデバイスで表示できるようにする設定  -->
+        <!-- レスポンシブデザインのための設定。Webサイトをさまざまなデバイスで表示できるようになる  -->
     <meta name="description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
-        <!--   -->
+        <!-- description(説明文)は、Googleなどの検索結果に表示される説明文。  -->
     <meta name="keywords" content="車選び,AI推薦,自動車診断,最適な車,車探し">
+        <!-- keywordはこのページが何について書かれているか検索エンジンに伝える。現在はSEO効果は限定的だが、ページ内容の整理に役立つ -->
     <meta name="robots" content="index, follow">
+        <!-- robotsは検索エンジンのクローラー(ボット)に対する指示
+        	index:このページを検索結果に表示してもいい
+            follow：このページのリンク先も巡回してもいい
+         -->
     <meta property="og:title" content="AI自動車診断 - あなたに最適な車を見つけましょう">
     <meta property="og:description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
     <meta property="og:type" content="website">
+        <!--OGP(Open Graph Protocol)はfacebookやXなどのSNSでシェアされたときに表示される情報を制御する。
+        	og:title：SNSで表示されるタイトル
+            og:description：SNSで表示される説明文
+            og:type：コンテンツの種類(この場合はWebサイト)
+        -->
+    <!-- metaタグを使う理由
+    	1.SEO対策：検索エンジンにページの内容を伝える
+        2.ユーザビリティ：適切な文字コードや表示設定でユーザーが快適に閲覧できる
+        3.SNS対策：シェアされた時に魅力的に表示される
+        4.アクセシビティ：様々なデバイスや環境で正しく表示される
+     -->
     <title>AI自動車診断 - あなたに最適な車を見つけましょう</title>
-    
+    	<!-- titleは、ブラウザのタブに表示される文字で検索結果でも最も目立つ部分。SEOにとって有効 -->
+
     <!-- CSSファイルの読み込み（既存のファイル構造を使用） -->
+    <!-- 外部リソースの読み込み（既存のファイル構造を使用） -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <!-- CSS(スタイルシート)の読み込み
+        	url_for() は Flask(Pythonのウェブフレームワーク)の記法で、静的ファイルへのパスを自動生成している
+         -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/hybrid.css') }}">
     <!-- FontAwesomeアイコン -->
+    	 <!-- Font Awesomeというアイコンライブラリを読み込んでいる。 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- ファビコン -->
+    <!-- ファビコン(ブラウザのタブに表示される小さなアイコン)の設定 -->
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
 </head>
 <body>
