@@ -7,36 +7,7 @@
 // 診断機能とモード切り替え
 // ========================================================================
 
-/**
- * 診断モードと詳細検索の切り替え
- */
-
-function toggleSearchMode() {
-    const diagnosisMode = document.getElementById('diagnosis-mode');
-    const detailedForm = document.getElementById('car-filter-form');
-
-    if (diagnosisMode.style.display === 'none' || !diagnosisMode.classList.contains('active')) {
-        // 簡単診断モードを表示
-        diagnosisMode.style.display = 'block';
-        diagnosisMode.classList.add('active');
-        detailedForm.style.display = 'none';
-
-        // アニメーション効果
-        setTimeout(() => {
-            diagnosisMode.scrollIntoView({ behavior: 'smooth', block: 'start'});
-        }, 100);
-    } else {
-        // 詳細検索モードを表示
-        diagnosisMode.style.display = 'none';
-        diagnosisMode.classList.remove('active');
-        detailedForm.style.display = 'block';
-
-        // アニメーション効果
-        setTimeout(() => {
-            detailedForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-    }
-}
+// トグル処理は hybrid.js に統一
 
 /**
  *  AI診断の実行
@@ -76,27 +47,27 @@ function runDiagnosis() {
         },
         body: JSON.stringify(preferences)
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        hideLoading();
-        if (data.success) {
-            displayDiagnosisResults(data.cars, data.user_profile);
-            showNotification('AI診断が完了しました！', 'success');
-        } else {
-            console.error('診断エラー:', data.error);
-            showNotification('診断中にエラーが発生しました。詳細検索をお試しください。', 'error');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        console.error('通信エラー:', error);
-        showNotification('通信エラーが発生しました。詳細検索をお試しください。', 'error');
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                displayDiagnosisResults(data.cars, data.user_profile);
+                showNotification('AI診断が完了しました！', 'success');
+            } else {
+                console.error('診断エラー:', data.error);
+                showNotification('診断中にエラーが発生しました。詳細検索をお試しください。', 'error');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('通信エラー:', error);
+            showNotification('通信エラーが発生しました。詳細検索をお試しください。', 'error');
+        });
 }
 
 
@@ -106,7 +77,7 @@ function runDiagnosis() {
 function applyProfileBasedSettings(preferences) {
     // 予算範囲を数値に変換
     const budgetMapping = {
-         'low': { max: 200, min: 50 },
+        'low': { max: 200, min: 50 },
         'medium': { max: 400, min: 200 },
         'high': { max: 1000, min: 400 }
     };
@@ -123,7 +94,7 @@ function applyProfileBasedSettings(preferences) {
             preferences.body_types = ['ミニバン', 'SUV', 'ハッチバック'];
             break;
         case 'commute':
-             preferences.min_fuel_economy = '15';
+            preferences.min_fuel_economy = '15';
             preferences.body_types = ['ハッチバック', '軽自動車', 'セダン'];
             break;
         case 'leisure':
@@ -183,7 +154,7 @@ function showLoading() {
 function hideLoading() {
     const loading = document.getElementById('loading');
     const results = document.getElementById('results');
-    
+
     if (loading) {
         loading.classList.remove('active');
     }
@@ -199,13 +170,13 @@ function displayDiagnosisResults(cars, userProfile) {
     // 結果コンテナの取得
     const resultsContainer = document.getElementById('results');
     if (!resultsContainer) return;
-    
+
     // 車両カードの更新
     updateCarResults(cars);
-    
+
     // 推薦洞察の表示
     showRecommendationInsights(cars, userProfile);
-    
+
     // 結果セクションにスクロール
     setTimeout(() => {
         resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -218,17 +189,17 @@ function displayDiagnosisResults(cars, userProfile) {
 function updateCarResults(cars) {
     const carCardsContainer = document.getElementById('car-results');
     if (!carCardsContainer) return;
-    
+
     // 既存カードをクリア
     carCardsContainer.innerHTML = '';
-    
+
     // 新しいカードを生成
     cars.forEach((car, index) => {
         const carCard = createCarCard(car);
         carCard.style.opacity = '0';
         carCard.style.transform = 'translateY(20px)';
         carCardsContainer.appendChild(carCard);
-        
+
         // アニメーション付きで表示
         setTimeout(() => {
             carCard.style.opacity = '1';
@@ -236,10 +207,10 @@ function updateCarResults(cars) {
             carCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         }, index * 100);
     });
-    
+
     // 結果数の更新
     updateResultCount(cars.length);
-    
+
     // お気に入り機能の再設定
     setupFavoriteButtons();
 }
@@ -253,7 +224,7 @@ function createCarCard(car) {
     cardElement.setAttribute('data-price', car['価格(万円)'] || 0);
     cardElement.setAttribute('data-fuel', car['燃費(km/L)'] || 0);
     cardElement.setAttribute('data-score', car['推薦スコア'] || 0);
-    
+
     // 安全な値の取得
     const maker = car['メーカー'] || '';
     const model = car['車種'] || '';
@@ -269,7 +240,7 @@ function createCarCard(car) {
     const score = car['推薦スコア'] || '';
     const reason = car['推薦理由'] || '';
     const id = car['id'] || '';
-    
+
     cardElement.innerHTML = `
         <div class="car-header">
             <h3>${maker} ${model}</h3>
@@ -293,7 +264,12 @@ function createCarCard(car) {
                 <div class="info-row">
                     <div class="info-item">
                         <span class="label"><i class="fas fa-yen-sign"></i> 価格:</span>
-                        <span class="value highlight">${price}万円</span>
+                        <span class="value highlight">${(() => {
+            let p = parseFloat(price.toString().replace(/,/g, ''));
+            if (isNaN(p)) return price;
+            if (p >= 100000) p = p / 10000;
+            return p.toLocaleString();
+        })()}万円</span>
                     </div>
                     ${fuel ? `<div class="info-item">
                         <span class="label"><i class="fas fa-gas-pump"></i> 燃費:</span>
@@ -340,7 +316,7 @@ function createCarCard(car) {
             </div>
         </div>
     `;
-    
+
     return cardElement;
 }
 
@@ -353,7 +329,7 @@ function showRecommendationInsights(cars, userProfile) {
     if (existingInsights) {
         existingInsights.remove();
     }
-    
+
     // 新しい洞察セクションを作成
     const insightsHtml = `
         <div class="recommendation-insights">
@@ -381,12 +357,12 @@ function showRecommendationInsights(cars, userProfile) {
             </div>
         </div>
     `;
-    
+
     // 結果セクションの前に挿入
     const resultsSection = document.getElementById('results');
     if (resultsSection) {
         resultsSection.insertAdjacentHTML('beforebegin', insightsHtml);
-        
+
         // アニメーション効果
         const newInsights = document.querySelector('.recommendation-insights');
         if (newInsights) {
@@ -408,7 +384,7 @@ function updateResultCount(count) {
     const resultCount = document.querySelector('.result-count');
     if (resultCount) {
         resultCount.textContent = `(${count}台)`;
-        
+
         // アニメーション効果
         resultCount.style.transform = 'scale(1.2)';
         setTimeout(() => {
@@ -442,13 +418,13 @@ function getProfileDisplayName(profile) {
  */
 function calculateAveragePrice(cars) {
     if (!cars || cars.length === 0) return 0;
-    
+
     const topThree = cars.slice(0, Math.min(3, cars.length));
     const total = topThree.reduce((sum, car) => {
         const price = parseFloat(car['価格(万円)'] || 0);
         return sum + price;
     }, 0);
-    
+
     return Math.round(total / topThree.length);
 }
 
@@ -472,7 +448,7 @@ function showNotification(message, type = 'info') {
     if (existingNotification) {
         existingNotification.remove();
     }
-    
+
     // 新しい通知を作成
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -485,7 +461,7 @@ function showNotification(message, type = 'info') {
             </button>
         </div>
     `;
-    
+
     // スタイル設定
     Object.assign(notification.style, {
         position: 'fixed',
@@ -502,7 +478,7 @@ function showNotification(message, type = 'info') {
         transform: 'translateX(100%)',
         transition: 'all 0.3s ease'
     });
-    
+
     // タイプ別の色設定
     const colors = {
         'success': '#4CAF50',
@@ -511,7 +487,7 @@ function showNotification(message, type = 'info') {
         'info': '#2196F3'
     };
     notification.style.backgroundColor = colors[type] || colors.info;
-    
+
     // 通知スタイル
     const style = document.createElement('style');
     style.textContent = `
@@ -534,16 +510,16 @@ function showNotification(message, type = 'info') {
         }
     `;
     document.head.appendChild(style);
-    
+
     // DOMに追加
     document.body.appendChild(notification);
-    
+
     // アニメーション
     setTimeout(() => {
         notification.style.opacity = '1';
         notification.style.transform = 'translateX(0)';
     }, 100);
-    
+
     // 自動削除
     setTimeout(() => {
         if (notification.parentNode) {
@@ -577,10 +553,10 @@ function getNotificationIcon(type) {
 function setupFavoriteButtons() {
     const favoriteButtons = document.querySelectorAll('.favorite-button');
     const favorites = JSON.parse(localStorage.getItem('carFavorites')) || [];
-    
+
     favoriteButtons.forEach(button => {
         const carId = button.getAttribute('data-car-id');
-        
+
         // 初期状態の設定
         if (favorites.includes(carId)) {
             button.innerHTML = '<i class="fas fa-heart"></i> お気に入り済み';
@@ -589,14 +565,14 @@ function setupFavoriteButtons() {
             button.innerHTML = '<i class="far fa-heart"></i> お気に入り';
             button.classList.remove('favorited');
         }
-        
+
         // 既存のイベントリスナーを削除（重複防止）
         button.replaceWith(button.cloneNode(true));
-        
+
         // 新しいイベントリスナーを追加
         const newButton = document.querySelector(`[data-car-id="${carId}"]`);
         if (newButton) {
-            newButton.addEventListener('click', function(event) {
+            newButton.addEventListener('click', function (event) {
                 event.stopPropagation();
                 toggleFavorite(carId, this);
             });
@@ -609,7 +585,7 @@ function setupFavoriteButtons() {
  */
 function toggleFavorite(carId, button) {
     let favorites = JSON.parse(localStorage.getItem('carFavorites')) || [];
-    
+
     if (favorites.includes(carId)) {
         // お気に入りから削除
         favorites = favorites.filter(id => id !== carId);
@@ -622,7 +598,7 @@ function toggleFavorite(carId, button) {
         button.innerHTML = '<i class="fas fa-heart"></i> お気に入り済み';
         button.classList.add('favorited');
         showNotification('お気に入りに追加しました', 'success');
-        
+
         // 追加時のアニメーション
         button.style.transform = 'scale(1.1)';
         setTimeout(() => {
@@ -630,7 +606,7 @@ function toggleFavorite(carId, button) {
             button.style.transition = 'transform 0.3s ease';
         }, 200);
     }
-    
+
     // ローカルストレージに保存
     localStorage.setItem('carFavorites', JSON.stringify(favorites));
 }
@@ -642,31 +618,24 @@ function toggleFavorite(carId, button) {
 /**
  * ページ読み込み時の初期化
  */
-document.addEventListener('DOMContentLoaded', function() {
-    // 初期状態では詳細検索を表示
-    const diagnosisMode = document.getElementById('diagnosis-mode');
-    const detailedForm = document.getElementById('car-filter-form');
-    
-    if (diagnosisMode && detailedForm) {
-        diagnosisMode.style.display = 'none';
-        detailedForm.style.display = 'block';
-    }
-    
+document.addEventListener('DOMContentLoaded', function () {
+    // 初期表示の制御は hybrid.js に統一
+
     // 簡単診断モードを初期表示にする場合
     // toggleSearchMode();
-    
+
     // お気に入り機能の初期設定
     setupFavoriteButtons();
-    
+
     // ラジオボタンの選択時のアニメーション
     setupRadioAnimations();
-    
+
     // 診断結果がある場合の自動スクロール
     if (document.querySelector('.recommendation-insights')) {
         setTimeout(() => {
-            document.querySelector('.recommendation-insights')?.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
+            document.querySelector('.recommendation-insights')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
             });
         }, 500);
     }
@@ -677,9 +646,9 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function setupRadioAnimations() {
     const radioLabels = document.querySelectorAll('.radio-group label');
-    
+
     radioLabels.forEach(label => {
-        label.addEventListener('click', function() {
+        label.addEventListener('click', function () {
             // 同じグループの他のラベルからselectedクラスを削除
             const radio = this.querySelector('input[type="radio"]');
             if (radio) {
@@ -687,10 +656,10 @@ function setupRadioAnimations() {
                 document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
                     r.closest('label')?.classList.remove('selected');
                 });
-                
+
                 // クリックされたラベルにselectedクラスを追加
                 this.classList.add('selected');
-                
+
                 // アニメーション効果
                 this.style.transform = 'scale(0.95)';
                 setTimeout(() => {
@@ -709,7 +678,7 @@ function setupRadioAnimations() {
 /**
  * グローバルエラーハンドラー
  */
-window.addEventListener('error', function(event) {
+window.addEventListener('error', function (event) {
     console.error('JavaScript Error:', event.error);
     showNotification('予期しないエラーが発生しました', 'error');
 });
@@ -717,12 +686,12 @@ window.addEventListener('error', function(event) {
 /**
  * 未処理のPromise拒否のハンドラー
  */
-window.addEventListener('unhandledrejection', function(event) {
+window.addEventListener('unhandledrejection', function (event) {
     console.error('Unhandled Promise Rejection:', event.reason);
     showNotification('通信エラーが発生しました', 'error');
     event.preventDefault();
 });
 
 // グローバル関数として公開（HTMLから呼び出し可能にする）
-window.toggleSearchMode = toggleSearchMode;
+// toggleSearchMode は hybrid.js が公開
 window.runDiagnosis = runDiagnosis;

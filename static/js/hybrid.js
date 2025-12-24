@@ -13,7 +13,7 @@ let hybridDiagnosis = {
     userData: {},
     stepValidation: {
         1: ['hybrid_purpose', 'hybrid_budget', 'hybrid_passengers'], // 事実情報
-        2: ['hybrid_fuel_importance', 'hybrid_safety_importance', 'hybrid_design_importance', 
+        2: ['hybrid_fuel_importance', 'hybrid_safety_importance', 'hybrid_design_importance',
             'hybrid_space_importance', 'hybrid_maintenance_importance'], // 嗜好情報
         3: [] // 結果表示（バリデーション不要）
     }
@@ -72,7 +72,7 @@ const userProfiles = {
 // 初期化とイベントリスナー
 // ========================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // ハイブリッド診断機能の初期化
     initializeHybridDiagnosis();
 });
@@ -80,11 +80,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeHybridDiagnosis() {
     // イベントリスナーの設定
     setupHybridEventListeners();
-    
+
     // 初期状態の設定
     updateHybridProgress();
     updateHybridNavigation();
-    
+
     // 初期モード設定（ハイブリッド診断を表示）
     showHybridDiagnosis();
 }
@@ -92,10 +92,10 @@ function initializeHybridDiagnosis() {
 function setupHybridEventListeners() {
     // 選択肢カード（事実情報）のイベント
     setupChoiceCardEvents();
-    
+
     // 5段階評価（嗜好情報）のイベント
     setupRatingEvents();
-    
+
     // ナビゲーションボタンのイベント
     setupHybridNavigationEvents();
 }
@@ -106,37 +106,37 @@ function setupHybridEventListeners() {
 
 function setupChoiceCardEvents() {
     const choiceCards = document.querySelectorAll('.choice-card');
-    
+
     choiceCards.forEach(card => {
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function () {
             const radio = this.querySelector('input[type="radio"]');
             if (!radio) return;
-            
+
             const name = radio.name;
             const value = radio.value;
-            
+
             // 同じグループの他の選択肢をクリア
             document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
                 input.closest('.choice-card').classList.remove('selected');
             });
-            
+
             // 現在の選択肢を選択状態にする
             this.classList.add('selected');
             radio.checked = true;
-            
+
             // アニメーション効果
             this.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 this.style.transform = '';
                 this.style.transition = 'transform 0.2s ease';
             }, 150);
-            
+
             // データを保存
             hybridDiagnosis.userData[name] = value;
-            
+
             // ナビゲーション状態を更新
             updateHybridNavigation();
-            
+
             console.log(`選択更新: ${name} = ${value}`);
         });
     });
@@ -148,37 +148,37 @@ function setupChoiceCardEvents() {
 
 function setupRatingEvents() {
     const ratingOptions = document.querySelectorAll('.rating-option');
-    
+
     ratingOptions.forEach(option => {
-        option.addEventListener('click', function() {
+        option.addEventListener('click', function () {
             const radio = this.querySelector('input[type="radio"]');
             if (!radio) return;
-            
+
             const name = radio.name;
             const value = parseInt(radio.value);
-            
+
             // 同じグループの他の選択肢をクリア
             document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
                 input.closest('.rating-option').classList.remove('selected');
             });
-            
+
             // 現在の選択肢を選択状態にする
             this.classList.add('selected');
             radio.checked = true;
-            
+
             // アニメーション効果
             this.style.transform = 'scale(0.9)';
             setTimeout(() => {
                 this.style.transform = '';
                 this.style.transition = 'transform 0.2s ease';
             }, 150);
-            
+
             // データを保存
             hybridDiagnosis.userData[name] = value;
-            
+
             // ナビゲーション状態を更新
             updateHybridNavigation();
-            
+
             console.log(`評価更新: ${name} = ${value}`);
         });
     });
@@ -200,12 +200,12 @@ function nextHybridStep() {
             showHybridNotification('すべての質問にお答えください', 'warning');
             return;
         }
-        
+
         // ステップ2から3に進む場合は診断結果を生成
         if (hybridDiagnosis.currentStep === 2) {
             generateHybridDiagnosisResult();
         }
-        
+
         // ステップを進める
         moveToHybridStep(hybridDiagnosis.currentStep + 1);
     }
@@ -223,24 +223,24 @@ function moveToHybridStep(targetStep) {
     if (currentStepElement) {
         currentStepElement.classList.remove('active');
     }
-    
+
     // 新しいステップを表示
     hybridDiagnosis.currentStep = targetStep;
     const newStepElement = document.getElementById(`diagnosis-step-${hybridDiagnosis.currentStep}`);
     if (newStepElement) {
         newStepElement.classList.add('active');
     }
-    
+
     // UI状態を更新
     updateHybridProgress();
     updateHybridNavigation();
     updateStepText();
-    
+
     // スクロール位置を調整
     setTimeout(() => {
-        document.getElementById('hybrid-diagnosis-mode').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
+        document.getElementById('hybrid-diagnosis-mode').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
         });
     }, 100);
 }
@@ -252,7 +252,7 @@ function moveToHybridStep(targetStep) {
 function validateCurrentHybridStep() {
     const requiredFields = hybridDiagnosis.stepValidation[hybridDiagnosis.currentStep];
     if (!requiredFields) return true;
-    
+
     return requiredFields.every(fieldName => {
         const isAnswered = hybridDiagnosis.userData[fieldName] !== undefined;
         if (!isAnswered) {
@@ -269,7 +269,7 @@ function validateCurrentHybridStep() {
 function updateHybridProgress() {
     const progressFill = document.getElementById('diagnosisProgressFill');
     const progress = (hybridDiagnosis.currentStep / hybridDiagnosis.totalSteps) * 100;
-    
+
     if (progressFill) {
         progressFill.style.width = progress + '%';
     }
@@ -278,22 +278,22 @@ function updateHybridProgress() {
 function updateHybridNavigation() {
     const prevBtn = document.getElementById('hybridPrevBtn');
     const nextBtn = document.getElementById('hybridNextBtn');
-    
+
     if (!prevBtn || !nextBtn) return;
-    
+
     // 前へボタンの状態
     prevBtn.disabled = hybridDiagnosis.currentStep === 1;
-    
+
     // 次へボタンの状態
     if (hybridDiagnosis.currentStep === hybridDiagnosis.totalSteps) {
         nextBtn.style.display = 'none';
     } else {
         nextBtn.style.display = 'flex';
-        
+
         // 現在のステップの回答状況をチェック
         const isStepComplete = validateCurrentHybridStep();
         nextBtn.disabled = !isStepComplete;
-        
+
         // ボタンテキストの更新
         if (hybridDiagnosis.currentStep === 2) {
             nextBtn.innerHTML = '<i class="fas fa-chart-line"></i> 診断結果を見る';
@@ -307,7 +307,7 @@ function updateStepText() {
     const currentStepText = document.getElementById('currentStepText');
     const stepCounter = document.getElementById('stepCounter');
     const totalSteps = document.getElementById('totalSteps');
-    
+
     if (currentStepText) {
         const stepTexts = {
             1: '基本情報',
@@ -316,11 +316,11 @@ function updateStepText() {
         };
         currentStepText.textContent = stepTexts[hybridDiagnosis.currentStep] || '診断中';
     }
-    
+
     if (stepCounter) {
         stepCounter.textContent = hybridDiagnosis.currentStep;
     }
-    
+
     if (totalSteps) {
         totalSteps.textContent = hybridDiagnosis.totalSteps;
     }
@@ -332,13 +332,16 @@ function updateStepText() {
 
 function generateHybridDiagnosisResult() {
     console.log('診断結果生成開始:', hybridDiagnosis.userData);
-    
+
     // ユーザープロファイルの分析
     const profileAnalysis = analyzeHybridUserProfile(hybridDiagnosis.userData);
-    
+
     // 結果をUIに表示
     displayHybridDiagnosisResult(profileAnalysis);
-    
+
+    // グローバルに結果を保存（推薦実行時に使用）
+    window.hybridDiagnosisResult = profileAnalysis;
+
     console.log('生成されたプロファイル:', profileAnalysis);
 }
 
@@ -350,11 +353,11 @@ function analyzeHybridUserProfile(userData) {
         eco: 0,
         balance: 0
     };
-    
+
     // ===== 事実情報による分析 =====
-    
+
     // 用途による分析
-    switch(userData.hybrid_purpose) {
+    switch (userData.hybrid_purpose) {
         case 'family':
             profileScores.family += 40;
             profileScores.balance += 20;
@@ -372,9 +375,9 @@ function analyzeHybridUserProfile(userData) {
             profileScores.balance += 20;
             break;
     }
-    
+
     // 予算による分析
-    switch(userData.hybrid_budget) {
+    switch (userData.hybrid_budget) {
         case 'low':
             profileScores.commuter += 30;
             profileScores.eco += 20;
@@ -387,9 +390,9 @@ function analyzeHybridUserProfile(userData) {
             profileScores.luxury += 40;
             break;
     }
-    
+
     // 乗車人数による分析
-    switch(userData.hybrid_passengers) {
+    switch (userData.hybrid_passengers) {
         case '1-2':
             profileScores.commuter += 20;
             profileScores.luxury += 15;
@@ -402,9 +405,9 @@ function analyzeHybridUserProfile(userData) {
             profileScores.family += 40;
             break;
     }
-    
+
     // ===== 嗜好情報による分析（5段階評価） =====
-    
+
     // 燃費重要度
     const fuelImportance = userData.hybrid_fuel_importance || 3;
     if (fuelImportance >= 4) {
@@ -413,14 +416,14 @@ function analyzeHybridUserProfile(userData) {
     } else if (fuelImportance <= 2) {
         profileScores.luxury += 10;
     }
-    
+
     // 安全性重要度
     const safetyImportance = userData.hybrid_safety_importance || 3;
     if (safetyImportance >= 4) {
         profileScores.family += 25;
         profileScores.balance += 15;
     }
-    
+
     // デザイン重要度
     const designImportance = userData.hybrid_design_importance || 3;
     if (designImportance >= 4) {
@@ -428,7 +431,7 @@ function analyzeHybridUserProfile(userData) {
     } else if (designImportance <= 2) {
         profileScores.commuter += 15;
     }
-    
+
     // 室内空間重要度
     const spaceImportance = userData.hybrid_space_importance || 3;
     if (spaceImportance >= 4) {
@@ -437,7 +440,7 @@ function analyzeHybridUserProfile(userData) {
         profileScores.commuter += 15;
         profileScores.luxury += 10;
     }
-    
+
     // 維持費重要度
     const maintenanceImportance = userData.hybrid_maintenance_importance || 3;
     if (maintenanceImportance >= 4) {
@@ -446,15 +449,15 @@ function analyzeHybridUserProfile(userData) {
     } else if (maintenanceImportance <= 2) {
         profileScores.luxury += 15;
     }
-    
+
     // 最も高いスコアのプロファイルを選択
-    const topProfile = Object.keys(profileScores).reduce((a, b) => 
+    const topProfile = Object.keys(profileScores).reduce((a, b) =>
         profileScores[a] > profileScores[b] ? a : b
     );
-    
+
     // 最低しきい値チェック（40点以上で確定）
     const finalProfile = profileScores[topProfile] >= 40 ? topProfile : 'balance';
-    
+
     return {
         type: finalProfile,
         score: profileScores[finalProfile],
@@ -465,19 +468,19 @@ function analyzeHybridUserProfile(userData) {
 
 function displayHybridDiagnosisResult(profileAnalysis) {
     const profile = userProfiles[profileAnalysis.type];
-    
+
     // プロファイルタイプを表示
     const profileTypeText = document.getElementById('profileTypeText');
     if (profileTypeText) {
         profileTypeText.textContent = profile.name;
     }
-    
+
     // プロファイル説明を表示
     const profileDescriptionText = document.getElementById('profileDescriptionText');
     if (profileDescriptionText) {
         profileDescriptionText.textContent = profile.description;
     }
-    
+
     // 推薦理由を表示
     const profileRecommendations = document.getElementById('profileRecommendations');
     if (profileRecommendations) {
@@ -486,7 +489,7 @@ function displayHybridDiagnosisResult(profileAnalysis) {
             .join('');
         profileRecommendations.innerHTML = recommendationHTML;
     }
-    
+
     // グローバルに結果を保存（推薦実行時に使用）
     window.hybridDiagnosisResult = profileAnalysis;
 }
@@ -496,130 +499,173 @@ function displayHybridDiagnosisResult(profileAnalysis) {
 // ========================================================================
 
 function executeHybridDiagnosis() {
+    console.log('executeHybridDiagnosis 開始');
+    console.log('hybridDiagnosisResult:', window.hybridDiagnosisResult);
+    console.log('hybridDiagnosis.userData:', hybridDiagnosis.userData);
+
+    // 診断結果が存在しない場合は再生成
     if (!window.hybridDiagnosisResult) {
+        console.log('診断結果を再生成します');
+        generateHybridDiagnosisResult();
+    }
+
+    if (!window.hybridDiagnosisResult) {
+        console.error('診断データが見つかりません');
         showHybridNotification('診断データが見つかりません。最初からやり直してください。', 'error');
         return;
     }
-    
+
     // ローディング表示
     showLoading();
-    
-    // ハイブリッド診断データを従来のAPIに合わせて変換
-    const apiPreferences = convertHybridDataToAPI(hybridDiagnosisResult);
-    
-    // 既存の推薦APIを呼び出し
-    fetch('/api/recommend', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiPreferences)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+
+    try {
+        // ハイブリッド診断データを従来のAPIに合わせて変換
+        console.log('API変換開始');
+        console.log('hybridDiagnosisResult:', window.hybridDiagnosisResult);
+
+        if (!window.hybridDiagnosisResult || !window.hybridDiagnosisResult.userData) {
+            throw new Error('診断データが不完全です');
         }
-        return response.json();
-    })
-    .then(data => {
+
+        const apiPreferences = convertHybridDataToAPI(window.hybridDiagnosisResult);
+        console.log('API変換結果:', apiPreferences);
+
+        // 既存の推薦APIを呼び出し
+        fetch('/api/recommend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(apiPreferences)
+        })
+            .then(response => {
+                console.log('API応答:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('API結果:', data);
+                hideLoading();
+                if (data.success) {
+                    displayDiagnosisResults(data.cars, data.user_profile);
+                    showHybridNotification('ハイブリッド診断が完了しました！', 'success');
+
+                    // 診断モードを非表示にして結果を表示
+                    const hybridMode = document.getElementById('hybrid-diagnosis-mode');
+                    if (hybridMode) {
+                        hybridMode.style.display = 'none';
+                    }
+                } else {
+                    console.error('診断エラー:', data.error);
+                    showHybridNotification(`診断中にエラーが発生しました: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('通信エラー:', error);
+                showHybridNotification(`通信エラーが発生しました: ${error.message}`, 'error');
+            });
+    } catch (error) {
         hideLoading();
-        if (data.success) {
-            displayDiagnosisResults(data.cars, data.user_profile);
-            showHybridNotification('ハイブリッド診断が完了しました！', 'success');
-            
-            // 診断モードを非表示にして結果を表示
-            document.getElementById('hybrid-diagnosis-mode').style.display = 'none';
-        } else {
-            console.error('診断エラー:', data.error);
-            showHybridNotification('診断中にエラーが発生しました。', 'error');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        console.error('通信エラー:', error);
-        showHybridNotification('通信エラーが発生しました。', 'error');
-    });
+        console.error('診断実行エラー:', error);
+        showHybridNotification('エラーが発生しました。', 'error');
+    }
 }
 
 function convertHybridDataToAPI(hybridResult) {
-    const userData = hybridResult.userData;
-    const profileType = hybridResult.type;
-    
-    // 基本設定
-    let apiData = {
-        // ユーザープロファイル情報
-        user_profile: profileType,
-        purpose: userData.hybrid_purpose,
-        experience_level: 'beginner', // ハイブリッド診断は初心者向け
-        
-        // 重要度設定（5段階評価を0-1の範囲に変換）
-        fuel_economy_importance: (userData.hybrid_fuel_importance || 3) / 5,
-        safety_importance: (userData.hybrid_safety_importance || 3) / 5,
-        design_importance: (userData.hybrid_design_importance || 3) / 5,
-        space_importance: (userData.hybrid_space_importance || 3) / 5,
-        maintenance_importance: (userData.hybrid_maintenance_importance || 3) / 5,
-        
-        // 基本設定をプロファイル別に調整
-        price_importance: 0.3, // デフォルト値
-    };
-    
-    // 予算設定
-    switch(userData.hybrid_budget) {
-        case 'low':
-            apiData.max_price = '200';
-            apiData.price_importance = 0.8;
-            break;
-        case 'medium':
-            apiData.max_price = '400';
-            apiData.price_importance = 0.5;
-            break;
-        case 'high':
-            apiData.max_price = '1000';
-            apiData.price_importance = 0.2;
-            break;
+    try {
+        console.log('convertHybridDataToAPI 開始:', hybridResult);
+
+        if (!hybridResult || !hybridResult.userData || !hybridResult.type) {
+            throw new Error('診断データが不完全です');
+        }
+
+        const userData = hybridResult.userData;
+        const profileType = hybridResult.type;
+
+        // 基本設定
+        let apiData = {
+            // ユーザープロファイル情報
+            user_profile: profileType,
+            purpose: userData.hybrid_purpose,
+            experience_level: 'beginner', // ハイブリッド診断は初心者向け
+
+            // 重要度設定（5段階評価を0-1の範囲に変換）
+            fuel_economy_importance: (userData.hybrid_fuel_importance || 3) / 5,
+            safety_importance: (userData.hybrid_safety_importance || 3) / 5,
+            design_importance: (userData.hybrid_design_importance || 3) / 5,
+            space_importance: (userData.hybrid_space_importance || 3) / 5,
+            maintenance_importance: (userData.hybrid_maintenance_importance || 3) / 5,
+
+            // 基本設定をプロファイル別に調整
+            price_importance: 0.3, // デフォルト値
+        };
+
+        // 予算設定
+        switch (userData.hybrid_budget) {
+            case 'low':
+                apiData.max_price = '200';
+                apiData.price_importance = 0.8;
+                break;
+            case 'medium':
+                apiData.max_price = '500';
+                apiData.price_importance = 0.5;
+                break;
+            case 'high':
+                apiData.max_price = '1000';
+                apiData.price_importance = 0.2;
+                break;
+        }
+
+        // 乗車人数設定
+        switch (userData.hybrid_passengers) {
+            case '1-2':
+                apiData.min_seats = '2';
+                apiData.preferred_size = 'small';
+                break;
+            case '3-4':
+                apiData.min_seats = '4';
+                apiData.preferred_size = 'medium';
+                break;
+            case '5+':
+                apiData.min_seats = '5';
+                apiData.preferred_size = 'large';
+                break;
+        }
+
+        // プロファイル別の追加設定
+        switch (profileType) {
+            case 'family':
+                apiData.body_types = ['ミニバン', 'SUV', 'ハッチバック'];
+                apiData.fuel_types = ['(HEV)', 'レギュラー', 'ハイオク'];
+                break;
+            case 'commuter':
+                apiData.body_types = ['ハッチバック', '軽自動車', 'セダン'];
+                apiData.fuel_types = ['(HEV)', '電気(BEV)', 'レギュラー'];
+                apiData.min_fuel_economy = '15';
+                break;
+            case 'luxury':
+                apiData.body_types = ['セダン', 'SUV', 'オープンカー'];
+                apiData.fuel_types = ['ハイオク', '(HEV)', '(PHEV)', 'ディーゼル'];
+                break;
+            case 'eco':
+                apiData.fuel_types = ['(HEV)', '電気(BEV)', '(PHEV)', '水素'];
+                apiData.min_fuel_economy = '20';
+                break;
+            case 'balance':
+                // バランス型は特に制限を設けない
+                break;
+        }
+
+        console.log('API変換結果:', apiData);
+        return apiData;
+
+    } catch (error) {
+        console.error('convertHybridDataToAPI エラー:', error);
+        throw error;
     }
-    
-    // 乗車人数設定
-    switch(userData.hybrid_passengers) {
-        case '1-2':
-            apiData.min_seats = '2';
-            apiData.preferred_size = 'small';
-            break;
-        case '3-4':
-            apiData.min_seats = '4';
-            apiData.preferred_size = 'medium';
-            break;
-        case '5+':
-            apiData.min_seats = '5';
-            apiData.preferred_size = 'large';
-            break;
-    }
-    
-    // プロファイル別の追加設定
-    switch(profileType) {
-        case 'family':
-            apiData.body_types = ['ミニバン', 'SUV', 'ハッチバック'];
-            apiData.fuel_types = ['ハイブリッド', 'ガソリン'];
-            break;
-        case 'commuter':
-            apiData.body_types = ['ハッチバック', '軽自動車', 'セダン'];
-            apiData.fuel_types = ['ハイブリッド', 'EV'];
-            apiData.min_fuel_economy = '15';
-            break;
-        case 'luxury':
-            apiData.body_types = ['セダン', 'SUV', 'オープンカー'];
-            break;
-        case 'eco':
-            apiData.fuel_types = ['ハイブリッド', 'EV', 'PHEV'];
-            apiData.min_fuel_economy = '20';
-            break;
-        case 'balance':
-            // バランス型は特に制限を設けない
-            break;
-    }
-    
-    console.log('API変換結果:', apiData);
-    return apiData;
 }
 
 // ========================================================================
@@ -627,18 +673,14 @@ function convertHybridDataToAPI(hybridResult) {
 // ========================================================================
 
 function toggleSearchMode() {
-    const hybridMode = document.getElementById('hybrid-diagnosis-mode');
-    const detailForm = document.getElementById('car-filter-form');
-    const modeToggleSection = document.querySelector('.mode-toggle-section');
-    
-    if (hybridMode && detailForm && modeToggleSection) {
-        if (hybridMode.style.display === 'none') {
-            // ハイブリッド診断モードを表示
-            showHybridDiagnosis();
-        } else {
-            // 詳細検索モードを表示
-            showDetailedSearch();
-        }
+    const mode = sessionStorage.getItem('searchMode');
+
+    if (mode === 'detailed') {
+        // 現在詳細検索なら、ハイブリッド診断を表示
+        showHybridDiagnosis();
+    } else {
+        // 現在ハイブリッド（または初期）なら、詳細検索を表示
+        showDetailedSearch();
     }
 }
 
@@ -646,13 +688,16 @@ function showHybridDiagnosis() {
     const hybridMode = document.getElementById('hybrid-diagnosis-mode');
     const detailForm = document.getElementById('car-filter-form');
     const modeToggleButton = document.querySelector('.mode-toggle-button');
-    
+
     if (hybridMode) hybridMode.style.display = 'block';
     if (detailForm) detailForm.style.display = 'none';
     if (modeToggleButton) {
         modeToggleButton.innerHTML = '<i class="fas fa-sliders-h"></i> 詳細検索に切り替え';
     }
-    
+
+    // セッションストレージにモードを保存
+    sessionStorage.setItem('searchMode', 'hybrid');
+
     // スクロール位置を調整
     setTimeout(() => {
         hybridMode?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -663,13 +708,24 @@ function showDetailedSearch() {
     const hybridMode = document.getElementById('hybrid-diagnosis-mode');
     const detailForm = document.getElementById('car-filter-form');
     const modeToggleButton = document.querySelector('.mode-toggle-button');
-    
+    const resultsSection = document.getElementById('results');
+
     if (hybridMode) hybridMode.style.display = 'none';
     if (detailForm) detailForm.style.display = 'block';
+
+    // 詳細検索に切り替える際は、既存の診断結果（もしあれば）をリセットして良いか検討
+    // ユーザーは「詳細検索画面に戻りたい」と言っているので、結果エリアを一度隠す
+    if (resultsSection) {
+        resultsSection.style.display = 'none';
+    }
+
     if (modeToggleButton) {
         modeToggleButton.innerHTML = '<i class="fas fa-brain"></i> スマート診断に戻る';
     }
-    
+
+    // セッションストレージにモードを保存
+    sessionStorage.setItem('searchMode', 'detailed');
+
     // スクロール位置を調整
     setTimeout(() => {
         detailForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -692,30 +748,299 @@ function showHybridNotification(message, type = 'info') {
 }
 
 // ========================================================================
+// 診断結果表示
+// ========================================================================
+
+function displayDiagnosisResults(cars, userProfile) {
+    // 結果表示エリアを取得
+    const resultsSection = document.getElementById('results');
+    if (!resultsSection) {
+        console.error('結果表示エリアが見つかりません');
+        return;
+    }
+
+    // 結果エリアを表示
+    resultsSection.style.display = 'block';
+
+    if (cars && cars.length > 0) {
+        // 車両カードを生成
+        const carsHTML = cars.map(car => {
+            const priceRange = (() => {
+                const parts = car['価格帯(万円)'].toString().split(/[~～]/);
+                const formatted = parts.map(part => {
+                    let v = parseFloat(part.replace(/,/g, ''));
+                    if (isNaN(v)) return part;
+                    if (v >= 100000) v = v / 10000;
+                    return v.toLocaleString();
+                });
+                return formatted.join('～');
+            })();
+
+            const fuelEconomy = car['燃費(km/L)'] || '未定';
+            const safetyEquipment = car['先進安全装備'] || '未定';
+            const recommendationScore = car['推薦スコア'] || 0;
+            const recommendationReason = car['推薦理由'] || '';
+
+            return `
+                <div class="car-card" data-car-id="${car.id}" data-price="${car['価格帯(万円)']}" data-fuel="${fuelEconomy}" data-score="${recommendationScore}">
+                    <div class="car-header">
+                        <h3>${car['メーカー']} ${car['車種']}</h3>
+                        ${recommendationScore > 0 ? `
+                        <div class="score-badge">
+                            <span class="score-value">${recommendationScore}</span>
+                            <span class="score-label">点</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="car-body">
+                        <div class="car-info">
+                            <div class="info-row">
+                                <div class="info-item">
+                                    <span class="label"><i class="fas fa-car-side"></i> タイプ:</span>
+                                    <span class="value">${car['ボディタイプ'] || '未定'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label"><i class="fas fa-cog"></i> 駆動:</span>
+                                    <span class="value">${car['駆動方式'] || '未定'}</span>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-item">
+                                    <span class="label"><i class="fas fa-yen-sign"></i> 価格帯:</span>
+                                    <span class="value highlight">${priceRange}万円</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label"><i class="fas fa-gas-pump"></i> 燃費:</span>
+                                    <span class="value">${fuelEconomy}km/L</span>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-item">
+                                    <span class="label"><i class="fas fa-shield-alt"></i> 安全装備:</span>
+                                    <span class="value">${safetyEquipment}</span>
+                                </div>
+                                ${car['乗車定員'] ? `
+                                <div class="info-item">
+                                    <span class="label"><i class="fas fa-users"></i> 定員:</span>
+                                    <span class="value">${car['乗車定員']}人</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            ${car.youtube_thumbnail ? `
+                            <a href="/car/${car.id}?tab=reviews" class="card-video-thumbnail">
+                                <img src="${car.youtube_thumbnail}" alt="${car['メーカー']} ${car['車種']} レビュー動画">
+                                <div class="video-play-badge"><i class="fab fa-youtube"></i> 動画</div>
+                            </a>
+                            ` : ''}
+                        </div>
+                        <div class="car-actions">
+                            <a href="/car/${car.id}" class="action-button"><i class="fas fa-info-circle"></i> 詳細</a>
+                            ${car.youtube_url ? `
+                            <a href="/car/${car.id}?tab=reviews" class="action-button youtube-button">
+                                <i class="fab fa-youtube"></i> 動画
+                            </a>
+                            ` : ''}
+                            <button class="action-button secondary favorite-button" data-car-id="${car.id}">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // 表示の更新 (results全体を破壊せず、各要素を個別に更新)
+        const titleDisplay = document.getElementById('result-title');
+        if (titleDisplay) titleDisplay.textContent = '診断結果';
+
+        const countDisplay = document.getElementById('result-count-display');
+        if (countDisplay) {
+            countDisplay.textContent = `(${cars.length}台)`;
+        }
+
+        const carContainer = document.getElementById('car-results');
+        if (carContainer) {
+            carContainer.innerHTML = carsHTML;
+        }
+
+        // 検索結果がない場合のメッセージを隠す
+        const noResults = document.getElementById('no-results-message');
+        if (noResults) noResults.style.display = 'none';
+
+        // ページネーションを非表示にする (スマート診断は1ページのみ)
+        const paginationContainer = document.getElementById('pagination-container');
+        if (paginationContainer) {
+            paginationContainer.style.display = 'none';
+        }
+
+        // 並び替えオプションを調整 (推薦順を追加/選択)
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect) {
+            let optRecommended = sortSelect.querySelector('option[value="recommended"]');
+            if (!optRecommended) {
+                optRecommended = document.createElement('option');
+                optRecommended.value = 'recommended';
+                optRecommended.textContent = '推薦順';
+                sortSelect.insertBefore(optRecommended, sortSelect.firstChild);
+            }
+            sortSelect.value = 'recommended';
+        }
+
+        // 各種ユーティリティの再実行
+        if (typeof setupFavorites === 'function') setupFavorites();
+        if (typeof animateCards === 'function') animateCards();
+        if (typeof setupCarCards === 'function') setupCarCards();
+
+        // スクロール
+        setTimeout(() => {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+
+    } else {
+        // 結果が0件の場合
+        const carContainer = document.getElementById('car-results');
+        if (carContainer) carContainer.innerHTML = '';
+
+        const noResults = document.getElementById('no-results-message');
+        if (noResults) noResults.style.display = 'flex';
+
+        const paginationContainer = document.getElementById('pagination-container');
+        if (paginationContainer) paginationContainer.style.display = 'none';
+
+        const titleDisplay = document.getElementById('result-title');
+        if (titleDisplay) titleDisplay.textContent = '検索結果';
+
+        const countDisplay = document.getElementById('result-count-display');
+        if (countDisplay) countDisplay.textContent = '(0台)';
+
+        setTimeout(() => {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+}
+
+// ========================================================================
+// ローディング表示
+// ========================================================================
+
+function showLoading() {
+    const loading = document.getElementById('loading');
+    if (loading) {
+        loading.style.display = 'flex';
+        loading.classList.add('active'); // CSSの.activeにも対応
+
+        // スピナーを確実に表示するための追加処理
+        const spinner = loading.querySelector('.spinner');
+        if (spinner) spinner.style.display = 'block';
+
+        // ローディング位置にスクロール
+        setTimeout(() => {
+            loading.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+    }
+}
+
+function hideLoading() {
+    const loading = document.getElementById('loading');
+    if (loading) {
+        loading.style.display = 'none';
+        loading.classList.remove('active');
+    }
+}
+
+// ========================================================================
 // ユーティリティ関数
 // ========================================================================
 
+/**
+ * 価格を整形する関数（Python版 format_currency と同等のロジック）
+ */
+function formatCurrency(value) {
+    if (!value) return '価格未定';
+
+    // 文字列に変換して波ダッシュなどで分割
+    const vStr = String(value);
+
+    // 既に「万円」が含まれている場合は、数値部分だけを抽出して再整形するか、そのまま返す
+    // ここでは Python 版に合わせ、~ で分割して個別に整形する
+    if (vStr.includes('~')) {
+        return vStr.split('~').map(v => formatSingleValue(v)).join('~');
+    } else if (vStr.includes('～')) { // 全角波ダッシュ
+        return vStr.split('～').map(v => formatSingleValue(v)).join('~');
+    }
+
+    return formatSingleValue(vStr);
+}
+
+/**
+ * 単一の数値を整形するヘルパー関数
+ */
+function formatSingleValue(vStr) {
+    if (!vStr) return '';
+
+    // 数値以外の文字（カンマ、単位など）を取り除く
+    let cleanStr = String(vStr).replace(/,/g, '').replace(/万円/g, '').replace(/円/g, '').trim();
+    const v = parseFloat(cleanStr);
+
+    if (isNaN(v)) return vStr;
+
+    let result = v;
+    // 10000以上の場合は万円単位に変換(データが円単位の場合の補正)
+    if (result >= 10000) {
+        result = result / 10000;
+    }
+
+    // 整数なら整数表示、小数なら小数点1桁まで
+    if (Number.isInteger(result)) {
+        return result.toLocaleString();
+    } else {
+        // 小数点第1位まで表示
+        return result.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 1
+        });
+    }
+}
+
 function resetHybridDiagnosis() {
     // データをリセット
-    hybridDiagnosis.currentStep = 1;
-    hybridDiagnosis.userData = {};
-    
+    if (window.hybridDiagnosis) {
+        hybridDiagnosis.currentStep = 1;
+        hybridDiagnosis.userData = {};
+    }
+    window.hybridDiagnosisResult = null;
+
     // UI状態をリセット
     document.querySelectorAll('.choice-card.selected').forEach(card => {
         card.classList.remove('selected');
     });
-    
+
     document.querySelectorAll('.rating-option.selected').forEach(option => {
         option.classList.remove('selected');
     });
-    
+
     document.querySelectorAll('input[type="radio"]').forEach(radio => {
         radio.checked = false;
     });
-    
+
+    // 診断モードを表示し、結果を非表示にする
+    const hybridMode = document.getElementById('hybrid-diagnosis-mode');
+    const resultsSection = document.getElementById('results');
+
+    if (hybridMode) {
+        hybridMode.style.display = 'block';
+    }
+    if (resultsSection) {
+        resultsSection.style.display = 'none';
+        resultsSection.innerHTML = '';
+    }
+
     // 最初のステップに戻る
     moveToHybridStep(1);
-    
+
+    // プログレスバーもリセット
+    updateHybridProgress();
+
     console.log('ハイブリッド診断をリセットしました');
 }
 

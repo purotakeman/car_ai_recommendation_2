@@ -1,5 +1,5 @@
 /*全体のスタイル*/
-*{
+* {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -20,17 +20,17 @@
     --success-color: #2ecc71;
     --warning-color: #f1c40f;
     --danger-color: #e74c3c;
-    
+
     /* スペーシング */
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 15px;
     --spacing-lg: 20px;
     --spacing-xl: 30px;
-    
+
     /* シャドウ */
-    --card-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    --hover-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 body {
@@ -46,7 +46,12 @@ body {
 }
 
 /* 一般的なテキストスタイル */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: #2c3e50;
     margin-bottom: var(--spacing-md);
 }
@@ -143,6 +148,66 @@ button {
     background-color: #ecf0f1;
 }
 
+.action-button.youtube-button {
+    background-color: #FF0000;
+    color: white;
+    border: none;
+}
+
+.action-button.youtube-button:hover {
+    background-color: #cc0000;
+}
+
+/* カード内動画サムネイル */
+.card-video-thumbnail {
+    display: block;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-top: var(--spacing-md);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #000;
+}
+
+.card-video-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.card-video-thumbnail:hover img {
+    transform: scale(1.05);
+}
+
+.video-play-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    background: #f0f0f0;
+    font-size: 0.8rem;
+}
+
 /* ヘッダースタイル */
 header {
     text-align: center;
@@ -161,6 +226,35 @@ header h1 {
 header .tagline {
     color: var(--light-text);
     font-size: 1.1rem;
+}
+
+/* タブナビゲーション */
+.main-nav {
+    margin-top: var(--spacing-lg);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text-color);
+}
+
+.nav-link:hover {
+    background: #f7f9fb;
+}
+
+.nav-link.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15) inset;
 }
 
 /* 検索セクションのスタイル */
@@ -390,6 +484,7 @@ input[type="number"]:focus {
     flex: 1;
     min-width: 120px;
     margin-bottom: var(--spacing-sm);
+    margin-right: 15px;
 }
 
 .info-item.full-width {
@@ -411,11 +506,15 @@ input[type="number"]:focus {
 
 .value {
     font-weight: bold;
+    word-break: break-word;
+    /* 長い文字列は折り返す */
 }
 
 .value.highlight {
     color: var(--primary-color);
     font-size: 1.1rem;
+    display: inline-block;
+    /* 念のため */
 }
 
 /* 燃料タイプによるカラーコード化 */
@@ -524,7 +623,7 @@ footer {
     color: white;
     margin-bottom: var(--spacing-md);
     font-size: 1.1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: var(--spacing-sm);
 }
 
@@ -539,14 +638,14 @@ footer {
     justify-content: center;
     width: 36px;
     height: 36px;
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     color: white;
     transition: background-color 0.3s;
 }
 
 .social-link:hover {
-    background-color: rgba(255,255,255,0.2);
+    background-color: rgba(255, 255, 255, 0.2);
     color: white;
 }
 
@@ -554,7 +653,7 @@ footer {
     text-align: center;
     padding-top: var(--spacing-lg);
     margin-top: var(--spacing-lg);
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* レスポンシブデザイン */
@@ -562,32 +661,32 @@ footer {
     .container {
         padding: var(--spacing-sm);
     }
-    
+
     .filter-groups {
         flex-direction: column;
     }
-    
+
     .filter-group {
         width: 100%;
     }
-    
+
     .car-cards {
         grid-template-columns: 1fr;
     }
-    
+
     .checkbox-group {
         flex-direction: column;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }
-    
+
     .reset-button {
         margin-left: 0;
         margin-top: var(--spacing-sm);
     }
-    
+
     .footer-content {
         flex-direction: column;
     }
@@ -595,8 +694,15 @@ footer {
 
 /* アニメーション */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .car-card {
@@ -611,9 +717,48 @@ footer {
 }
 
 /* アニメーションのタイミングを少しずらす */
-.car-card:nth-child(1) { animation-delay: 0.1s; }
-.car-card:nth-child(2) { animation-delay: 0.2s; }
-.car-card:nth-child(3) { animation-delay: 0.3s; }
-.car-card:nth-child(4) { animation-delay: 0.4s; }
-.car-card:nth-child(5) { animation-delay: 0.5s; }
-.car-card:nth-child(6) { animation-delay: 0.6s; }
+.car-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.car-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.car-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.car-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.car-card:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.car-card:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+/* モード切替ボタン（白背景上での視認性向上） */
+.search-section .mode-toggle-button {
+    background-color: #fff;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.search-section .mode-toggle-button:hover {
+    background-color: #ecf0f1;
+}
+
+/* 詳細フォーム内トグルボタンの視認性向上（統一） */
+.search-section .toggle-mode-button {
+    background-color: #fff;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.search-section .toggle-mode-button:hover {
+    background-color: #ecf0f1;
+}

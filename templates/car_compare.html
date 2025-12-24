@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>車両比較 | AI自動車診断</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>車両比較</h1>
+            <p class="tagline">選択した車を見比べることができます</p>
+        </header>
+
+        <div class="results-section">
+            {% if cars %}
+                <h2><i class="fas fa-balance-scale"></i> 比較表</h2>
+                <div class="car-cards">
+                    {% for car in cars %}
+                    <div class="car-card">
+                        <div class="car-header">
+                            <h3>{{ car['メーカー'] }} {{ car['車種'] }}</h3>
+                        </div>
+                        <div class="car-body">
+                            <div class="car-info">
+                                <div class="info-row">
+                                    <div class="info-item"><span class="label">価格:</span> <span class="value highlight">{{ car['価格(万円)'] }}万円</span></div>
+                                    <div class="info-item"><span class="label">燃費:</span> <span class="value">{{ car['燃費(km/L)'] }}</span></div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-item"><span class="label">ボディ:</span> <span class="value">{{ car['ボディタイプ'] }}</span></div>
+                                    <div class="info-item"><span class="label">定員:</span> <span class="value">{{ car['乗車定員'] }}人</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>比較対象の車両が見つかりません。トップへ戻るには <a href="{{ url_for('home') }}">こちら</a>。</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" defer></script>
+</body>
+</html>
+
+

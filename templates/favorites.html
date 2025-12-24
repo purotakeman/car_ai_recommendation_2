@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お気に入り | AI自動車診断</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>お気に入り</h1>
+            <p class="tagline">保存した車両を確認できます</p>
+            <nav class="main-nav">
+                <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-home"></i> トップ</a>
+                <a href="{{ url_for('favorites') }}" class="nav-link active"><i class="far fa-heart"></i> お気に入り</a>
+                <a href="{{ url_for('compare_cars') }}" class="nav-link"><i class="fas fa-balance-scale"></i> 比較</a>
+            </nav>
+        </header>
+
+        <div class="results-section">
+            <p>このページは準備中です。トップへ戻るには <a href="{{ url_for('home') }}">こちら</a>。</p>
+        </div>
+    </div>
+</body>
+</html>
+
+

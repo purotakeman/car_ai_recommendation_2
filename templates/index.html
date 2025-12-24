@@ -1,25 +1,26 @@
 <!DOCTYPE html>
- <!-- ブラウザにHTML5の仕様に従って作ったページをレンダリングするように指示する。古いブラウザの互換モードで表示 -->
+<!-- ブラウザにHTML5の仕様に従って作ったページをレンダリングするように指示する。古いブラウザの互換モードで表示 -->
 <html lang="ja">
-    <!-- このWebページが日本語で書かれていることをブラウザや検索エンジンに伝えるHTML属性 -->
+<!-- このWebページが日本語で書かれていることをブラウザや検索エンジンに伝えるHTML属性 -->
+
 <head>
     <meta charset="UTF-8">
     <meta charset="UTF-8"><!-- 文字エンコードの指定。世界中の文字を表示できる標準的な文字コード  -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- レスポンシブデザインのための設定。Webサイトをさまざまなデバイスで表示できるようになる  -->
+    <!-- レスポンシブデザインのための設定。Webサイトをさまざまなデバイスで表示できるようになる  -->
     <meta name="description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
-        <!-- description(説明文)は、Googleなどの検索結果に表示される説明文。  -->
+    <!-- description(説明文)は、Googleなどの検索結果に表示される説明文。  -->
     <meta name="keywords" content="車選び,AI推薦,自動車診断,最適な車,車探し">
-        <!-- keywordはこのページが何について書かれているか検索エンジンに伝える。現在はSEO効果は限定的だが、ページ内容の整理に役立つ -->
+    <!-- keywordはこのページが何について書かれているか検索エンジンに伝える。現在はSEO効果は限定的だが、ページ内容の整理に役立つ -->
     <meta name="robots" content="index, follow">
-        <!-- robotsは検索エンジンのクローラー(ボット)に対する指示
+    <!-- robotsは検索エンジンのクローラー(ボット)に対する指示
         	index:このページを検索結果に表示してもいい
             follow：このページのリンク先も巡回してもいい
          -->
     <meta property="og:title" content="AI自動車診断 - あなたに最適な車を見つけましょう">
     <meta property="og:description" content="AI技術であなたに最適な車を推薦。ライフスタイルや予算に合わせたカーライフをサポートします。">
     <meta property="og:type" content="website">
-        <!--OGP(Open Graph Protocol)はfacebookやXなどのSNSでシェアされたときに表示される情報を制御する。
+    <!--OGP(Open Graph Protocol)はfacebookやXなどのSNSでシェアされたときに表示される情報を制御する。
         	og:title：SNSで表示されるタイトル
             og:description：SNSで表示される説明文
             og:type：コンテンツの種類(この場合はWebサイト)
@@ -31,46 +32,52 @@
         4.アクセシビティ：様々なデバイスや環境で正しく表示される
      -->
     <title>AI自動車診断 - あなたに最適な車を見つけましょう</title>
-    	<!-- titleは、ブラウザのタブに表示される文字で検索結果でも最も目立つ部分。SEOにとって有効 -->
+    <!-- titleは、ブラウザのタブに表示される文字で検索結果でも最も目立つ部分。SEOにとって有効 -->
 
     <!-- CSSファイルの読み込み（既存のファイル構造を使用） -->
     <!-- 外部リソースの読み込み（既存のファイル構造を使用） -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-        <!-- CSS(スタイルシート)の読み込み
+    <!-- CSS(スタイルシート)の読み込み
         	url_for() は Flask(Pythonのウェブフレームワーク)の記法で、静的ファイルへのパスを自動生成している
          -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/hybrid.css') }}">
     <!-- FontAwesomeアイコン -->
-    	 <!-- Font Awesomeというアイコンライブラリを読み込んでいる。 -->
+    <!-- Font Awesomeというアイコンライブラリを読み込んでいる。 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- ファビコン -->
     <!-- ファビコン(ブラウザのタブに表示される小さなアイコン)の設定 -->
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1><i class="fas fa-car"></i> AI自動車診断システム</h1>
             <p class="tagline">あなたにピッタリの車を見つけます</p>
+            <nav class="main-nav">
+                <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-home"></i> トップ</a>
+                <a href="{{ url_for('favorites') }}" class="nav-link"><i class="far fa-heart"></i> お気に入り</a>
+                <a href="{{ url_for('compare_cars') }}" class="nav-link"><i class="fas fa-balance-scale"></i> 比較</a>
+            </nav>
         </header>
-        
+
         <div class="search-section" id="search-form">
             <h2><i class="fas fa-search"></i> あなたにピッタリの車を見つけましょう</h2>
-            
+
             <!-- ハイブリッド診断モード -->
             <div class="hybrid-diagnosis-mode" id="hybrid-diagnosis-mode">
                 <div class="diagnosis-header">
                     <h3><i class="fas fa-brain"></i> スマート診断（おすすめ）</h3>
                     <p class="diagnosis-subtitle">段階的な質問で、より精密にあなたに最適な車を見つけます</p>
-                    
+
                     <!-- プログレスバー -->
                     <div class="diagnosis-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" id="diagnosisProgressFill"></div>
                         </div>
                         <div class="progress-text">
-                            <span id="currentStepText">基本情報</span> 
+                            <span id="currentStepText">基本情報</span>
                             (<span id="stepCounter">1</span> / <span id="totalSteps">3</span>)
                         </div>
                     </div>
@@ -79,7 +86,7 @@
                 <!-- ステップ1: 事実情報（選択肢形式） -->
                 <div class="diagnosis-step active" id="diagnosis-step-1">
                     <h4 class="step-title">基本情報をお聞かせください</h4>
-                    
+
                     <div class="question-group">
                         <label class="question-title">
                             <i class="fas fa-route"></i> 主な用途は何ですか？
@@ -139,7 +146,7 @@
                                 <input type="radio" name="hybrid_budget" value="medium">
                                 <div class="choice-content">
                                     <i class="fas fa-money-bill-wave choice-icon"></i>
-                                    <span class="choice-text">200〜400万円</span>
+                                    <span class="choice-text">200〜500万円</span>
                                     <small class="choice-desc">バランス重視</small>
                                 </div>
                             </label>
@@ -147,7 +154,7 @@
                                 <input type="radio" name="hybrid_budget" value="high">
                                 <div class="choice-content">
                                     <i class="fas fa-gem choice-icon"></i>
-                                    <span class="choice-text">400万円〜</span>
+                                    <span class="choice-text">500万円〜</span>
                                     <small class="choice-desc">品質・装備重視</small>
                                 </div>
                             </label>
@@ -341,9 +348,9 @@
                         <div class="rating-question">
                             <div class="rating-header">
                                 <i class="fas fa-tools rating-icon"></i>
-                                <div class="rating-title">維持費の安さ</div>
+                                <div class="rating-title">経済的な運用</div>
                             </div>
-                            <div class="rating-description">保険料、税金、メンテナンス費用を抑えたい度合いを教えてください</div>
+                            <div class="rating-description">車両価格、燃料費、保険料、税金を抑えたい度合いを教えてください</div>
                             <div class="rating-scale">
                                 <div class="scale-labels">
                                     <span>気にしない</span>
@@ -382,7 +389,7 @@
                         <h4 class="step-title">
                             <i class="fas fa-check-circle"></i> 診断完了！
                         </h4>
-                        
+
                         <div class="user-profile-result" id="userProfileResult">
                             <div class="profile-type-display">
                                 <span class="profile-label">あなたのタイプ:</span>
@@ -395,7 +402,7 @@
                                 <!-- 推薦理由がここに表示されます -->
                             </div>
                         </div>
-                        
+
                         <div class="diagnosis-action">
                             <button class="diagnosis-complete-button" onclick="executeHybridDiagnosis()">
                                 <i class="fas fa-car"></i> あなたに最適な車を見る
@@ -406,7 +413,8 @@
 
                 <!-- ナビゲーション -->
                 <div class="diagnosis-navigation">
-                    <button class="diagnosis-nav-button secondary" id="hybridPrevBtn" onclick="previousHybridStep()" disabled>
+                    <button class="diagnosis-nav-button secondary" id="hybridPrevBtn" onclick="previousHybridStep()"
+                        disabled>
                         <i class="fas fa-chevron-left"></i> 前へ
                     </button>
                     <button class="diagnosis-nav-button" id="hybridNextBtn" onclick="nextHybridStep()">
@@ -414,7 +422,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- 従来の詳細検索フォーム -->
             <form method="POST" action="/" id="car-filter-form" style="display: none;">
                 <!-- 既存の詳細検索フォームをそのまま維持 -->
@@ -425,70 +433,98 @@
                         <div class="checkbox-group">
                             <label><input type="checkbox" name="body_type" value="SUV">SUV</label>
                             <label><input type="checkbox" name="body_type" value="セダン">セダン</label>
-                            <label><input type="checkbox" name="body_type" value="ハッチバック">ハッチバック</label>  
+                            <label><input type="checkbox" name="body_type" value="ハッチバック">ハッチバック</label>
                             <label><input type="checkbox" name="body_type" value="ミニバン">ミニバン</label>
                             <label><input type="checkbox" name="body_type" value="軽自動車">軽自動車</label>
                             <label><input type="checkbox" name="body_type" value="オープンカー">オープンカー</label>
+                            <label><input type="checkbox" name="body_type" value="クーペ">クーペ</label>
+                            <label><input type="checkbox" name="body_type" value="ハイトワゴン">ハイトワゴン</label>
+                            <label><input type="checkbox" name="body_type" value="バン/トラック">バン/トラック</label>
+                            <label><input type="checkbox" name="body_type" value="ワゴン">ワゴン</label>
                         </div>
                     </div>
-                    
+
                     <div class="filter-group">
                         <h3><i class="fas fa-cogs"></i> 駆動方式</h3>
                         <p class="hint">複数選択できます</p>
                         <div class="checkbox-group">
-                            <label title="前輪または後輪のみで駆動するタイプ"><input type="checkbox" name="drive_type" value="2WD">2WD（二輪駆動）</label>
-                            <label title="全ての車輪で駆動し、悪路や雪道に強いタイプ"><input type="checkbox" name="drive_type" value="4WD">4WD（四輪駆動）</label>
+                            <label title="前輪または後輪のみで駆動するオートマチックタイプ"><input type="checkbox" name="drive_type"
+                                    value="2WD">2WD</label>
+                            <label title="前輪または後輪のみで駆動するマニュアルタイプ"><input type="checkbox" name="drive_type"
+                                    value="2WD(MT)">2WD(MT)</label>
+                            <label title="全ての車輪で駆動し、悪路や雪道に強いタイプ"><input type="checkbox" name="drive_type"
+                                    value="4WD">4WD</label>
+                            <label title="全ての車輪で駆動し、悪路や雪道に強いマニュアルタイプ"><input type="checkbox" name="drive_type"
+                                    value="4WD(MT)">4WD(MT)</label>
+                            <label title="全ての車輪で駆動し、悪路や雪道に強い4段マニュアルタイプ"><input type="checkbox" name="drive_type"
+                                    value="4WD(4MT)">4WD(4MT)</label>
+                            <label title="全ての車輪で駆動し、悪路や雪道に強い5段マニュアルタイプ"><input type="checkbox" name="drive_type"
+                                    value="4WD(5MT)">4WD(5MT)</label>
                         </div>
                     </div>
-                    
+
                     <div class="filter-group">
                         <h3><i class="fas fa-gas-pump"></i> 燃料タイプ</h3>
                         <p class="hint">複数選択できます</p>
                         <div class="checkbox-group">
-                            <label title="一般的な内燃機関車"><input type="checkbox" name="fuel_type" value="ガソリン">ガソリン</label>
-                            <label title="ガソリンエンジンと電気モーターを組み合わせた省燃費車"><input type="checkbox" name="fuel_type" value="ハイブリッド">ハイブリッド</label>
-                            <label title="トルクが強く燃費に優れたエンジン"><input type="checkbox" name="fuel_type" value="ディーゼル">ディーゼル</label>
-                            <label title="電気で走る環境に優しい車"><input type="checkbox" name="fuel_type" value="EV">EV（電気自動車）</label>
-                            <label title="家庭用電源でも充電できるハイブリッド車"><input type="checkbox" name="fuel_type" value="PHEV">PHEV（プラグインハイブリッド）</label>
+                            <label title="一般的な内燃機関車"><input type="checkbox" name="fuel_type" value="レギュラー">レギュラー</label>
+                            <label title="一般的な内燃機関車"><input type="checkbox" name="fuel_type" value="ハイオク">ハイオク</label>
+                            <label title="一般的な内燃機関車"><input type="checkbox" name="fuel_type" value="ディーゼル">ディーゼル</label>
+                            <label title="水素で走る環境に優しい車"><input type="checkbox" name="fuel_type" value="水素">水素</label>
+                            <label title="電気で走る環境に優しい車"><input type="checkbox" name="fuel_type"
+                                    value="電気(BEV)">電気(BEV)</label>
+                            <label title="エンジンと電気モーターを組み合わせた省燃費車"><input type="checkbox" name="fuel_type"
+                                    value="レギュラー(HEV)">レギュラー(HEV)</label>
+                            <label title="家庭用電源でも充電できるハイブリッド車"><input type="checkbox" name="fuel_type"
+                                    value="レギュラー(PHEV)">レギュラー(PHEV)</label>
+                            <label title="エンジンと電気モーターを組み合わせた省燃費車"><input type="checkbox" name="fuel_type"
+                                    value="ハイオク(HEV)">ハイオク(HEV)</label>
+                            <label title="家庭用電源でも充電できるハイブリッド車"><input type="checkbox" name="fuel_type"
+                                    value="ハイオク(PHEV)">ハイオク(PHEV)</label>
+                            <label title="エンジンと電気モーターを組み合わせた省燃費車"><input type="checkbox" name="fuel_type"
+                                    value="ディーゼル(HEV)">ディーゼル(HEV)</label>
+                            <label title="家庭用電源でも充電できるハイブリッド車"><input type="checkbox" name="fuel_type"
+                                    value="ディーゼル(PHEV)">ディーゼル(PHEV)</label>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="filter-groups">
                     <div class="filter-group">
-                        <h3><i class="fas fa-yen-sign"></i> 価格</h3>
+                        <h3><i class="fas fa-yen-sign"></i> 価格帯</h3>
                         <div class="input-with-label">
-                            <label for="max-price">上限（万円）</label>
-                            <input type="number" id="max-price" name="max_price" placeholder="例: 300" min="50" max="1000" step="10">
-                            <span class="input-hint">※50〜1000万円の範囲で設定できます</span>
+                            <label for="max-price">上限</label>
+                            <input type="number" id="max-price" name="max_price" placeholder="例: 3000000" min="500000"
+                                max="20000000" step="100000">
+                            <span class="input-hint">※500,000〜20,000,000円の範囲で設定できます</span>
                         </div>
                     </div>
-                    
+
                     <div class="filter-group">
                         <h3><i class="fas fa-tachometer-alt"></i> 燃費</h3>
                         <div class="input-with-label">
                             <label for="min-fuel-economy">下限（km/L）</label>
-                            <input type="number" id="min-fuel-economy" name="min_fuel_economy" placeholder="例: 15" min="5" max="40" step="0.5">
+                            <input type="number" id="min-fuel-economy" name="min_fuel_economy" placeholder="例: 15"
+                                min="5" max="40" step="0.5">
                             <span class="input-hint">※5〜40km/Lの範囲で設定できます</span>
+                            <!-- 電気と水素のスケールは100~200で設定できるように別の項目を作りたい -->
                         </div>
                     </div>
-                    
+
                     <div class="filter-group">
                         <h3><i class="fas fa-users"></i> 乗車定員</h3>
                         <div class="input-with-label">
                             <label for="min-seats">下限（人）</label>
-                            <input type="number" id="min-seats" name="min_seats" placeholder="例: 5" min="2" max="10" step="1">
-                            <span class="input-hint">※2〜10人の範囲で設定できます</span>
+                            <input type="number" id="min-seats" name="min_seats" placeholder="例: 5" min="2" max="14"
+                                step="1">
+                            <span class="input-hint">※2〜14人の範囲で設定できます</span>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="submit" class="search-button"><i class="fas fa-search"></i> 車を診断する</button>
                     <button type="reset" class="reset-button"><i class="fas fa-redo"></i> リセット</button>
-                    <button type="button" class="toggle-mode-button" onclick="toggleSearchMode()">
-                        <i class="fas fa-brain"></i> スマート診断に戻る
-                    </button>
                 </div>
             </form>
 
@@ -499,13 +535,13 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- ローディング表示 -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>AI が最適な車を診断中...</p>
         </div>
-        
+
         <!-- 推薦結果の洞察表示 -->
         {% if cars and show_recommendation_details %}
         <div class="recommendation-insights">
@@ -526,43 +562,58 @@
                 </div>
                 <div class="insight-card">
                     <h4>平均予算</h4>
-                    {% set avg_price = (cars[:3]|map(attribute='価格(万円)')|map('float')|sum / 3)|round|int %}
-                    <p class="budget-info">{{ avg_price }}万円</p>
-                    <small>上位3台の平均価格</small>
+                    {% set price_sum = 0 %}
+                    {% set price_count = 0 %}
+                    {% for car in cars[:3] %}
+                    {% if car['価格帯(万円)'] and '~' in car['価格帯(万円)'] %}
+                    {% set min_price = car['価格帯(万円)'].split('~')[0]|float %}
+                    {% set price_sum = price_sum + min_price %}
+                    {% set price_count = price_count + 1 %}
+                    {% endif %}
+                    {% endfor %}
+                    {% if price_count > 0 %}
+                    {% set avg_price = (price_sum / price_count)|round|int %}
+                    <p class="budget-info">{{ avg_price }}万円〜</p>
+                    {% else %}
+                    <p class="budget-info">価格未定</p>
+                    {% endif %}
+                    <small>上位3台の平均価格（下限値）</small>
                 </div>
             </div>
         </div>
         {% endif %}
-        
-        <!-- 既存の検索結果セクションをそのまま維持 -->
-        <div class="results-section" id="results">
-            <h2><i class="fas fa-list"></i> 検索結果 {% if cars %}<span class="result-count">({{ cars|length }}台)</span>{% endif %}</h2>
-            
-            {% if cars %}
-            <div class="sort-options">
-                <label for="sort-select">並び替え:</label>
-                <select id="sort-select" class="sort-select">
-                    <option value="recommended">推薦順</option>
-                    <option value="price-asc">価格: 安い順</option>
-                    <option value="price-desc">価格: 高い順</option>
-                    <option value="fuel-desc">燃費: 良い順</option>
-                </select>
+
+
+        <!-- 検索結果セクション（検索実行後のみ表示） -->
+        <div class="results-section" id="results" style="display: {% if cars %}block{% else %}none{% endif %};">
+            <div class="result-header">
+                <h2><i class="fas fa-list"></i> <span id="result-title">検索結果</span> <span class="result-count"
+                        id="result-count-display">{% if cars %}({{ cars|length }}台){% endif %}</span></h2>
+                <div class="sort-options">
+                    <label for="sort-select">並び替え:</label>
+                    <select id="sort-select" class="sort-select">
+                        <option value="price-asc">価格: 安い順</option>
+                        <option value="price-desc">価格: 高い順</option>
+                        <option value="fuel-desc">燃費: 良い順</option>
+                    </select>
+                </div>
             </div>
-            
+
+
             <div class="car-cards" id="car-results">
-                <!-- 既存の車両カード表示ロジックをそのまま維持 -->
+                {% if cars %}
+                <!-- 既存の車両カード表示ロジック -->
                 {% for car in cars %}
-                <div class="car-card" data-price="{{ car['価格(万円)'] }}" data-fuel="{{ car['燃費(km/L)'] }}" data-score="{{ car.get('推薦スコア', 0) }}">
+                <div class="car-card" data-price="{{ car['価格帯(万円)'] }}" data-fuel="{{ car['燃費(km/L)'] }}"
+                    data-score="{{ car.get('推薦スコア', 0) }}">
                     <div class="car-header">
                         <h3>{{ car['メーカー'] }} {{ car['車種'] }}</h3>
-                        {% if car.get('推薦スコア') %}
-                        <div class="score-badge">
-                            <span class="score-value">{{ car['推薦スコア'] }}</span>
+                        <div class="score-badge" {% if not car.get('推薦スコア') %}style="display:none;" {% endif %}>
+                            <span class="score-value">{{ car.get('推薦スコア', '') }}</span>
                             <span class="score-label">点</span>
                         </div>
-                        {% endif %}
                     </div>
-                    
+
                     <div class="car-body">
                         <div class="car-info">
                             <div class="info-row">
@@ -575,11 +626,11 @@
                                     <span class="value">{{ car['駆動方式'] }}</span>
                                 </div>
                             </div>
-                            
+
                             <div class="info-row">
                                 <div class="info-item">
-                                    <span class="label"><i class="fas fa-yen-sign"></i> 価格:</span>
-                                    <span class="value highlight">{{ car['価格(万円)'] }}万円</span>
+                                    <span class="label"><i class="fas fa-yen-sign"></i> 価格帯:</span>
+                                    <span class="value highlight">{{ format_currency(car['価格帯(万円)']) }}万円</span>
                                 </div>
                                 {% if car['燃費(km/L)'] %}
                                 <div class="info-item">
@@ -588,7 +639,7 @@
                                 </div>
                                 {% endif %}
                             </div>
-                            
+
                             <div class="info-row">
                                 {% if car['燃料の種類'] %}
                                 <div class="info-item">
@@ -603,7 +654,7 @@
                                 </div>
                                 {% endif %}
                             </div>
-                            
+
                             {% if car['サイズ(mm)'] %}
                             <div class="info-row">
                                 <div class="info-item full-width">
@@ -612,7 +663,7 @@
                                 </div>
                             </div>
                             {% endif %}
-                            
+
                             {% if car['中古相場(万円)'] %}
                             <div class="info-row">
                                 <div class="info-item">
@@ -627,68 +678,80 @@
                                 {% endif %}
                             </div>
                             {% endif %}
-                            
-                            {% if car.get('推薦理由') %}
-                            <div class="recommendation-reason">
-                                <i class="fas fa-star"></i> {{ car['推薦理由'] }}
-                            </div>
+
+                            {% if car.youtube_thumbnail %}
+                            <a href="/car/{{ car['id'] }}?tab=reviews" class="card-video-thumbnail">
+                                <img src="{{ car.youtube_thumbnail }}" alt="{{ car['メーカー'] }} {{ car['車種'] }} レビュー動画">
+                                <div class="video-play-badge"><i class="fab fa-youtube"></i> 動画</div>
+                            </a>
                             {% endif %}
                         </div>
-                        
+
                         <div class="car-actions">
-                            <a href="/car/{{ car['id'] }}" class="action-button"><i class="fas fa-info-circle"></i> 詳細</a>
+                            <a href="/car/{{ car['id'] }}" class="action-button"><i
+                                    class="fas fa-info-circle"></i>詳細</a>
+                            {% if car.youtube_url %}
+                            <a href="/car/{{ car['id'] }}?tab=reviews" class="action-button youtube-button">
+                                <i class="fab fa-youtube"></i> 動画
+                            </a>
+                            {% endif %}
                             <button class="action-button secondary favorite-button" data-car-id="{{ car['id'] }}">
-                                <i class="far fa-heart"></i> お気に入り
+                                <i class="far fa-heart"></i>
                             </button>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
             </div>
-            
-            <div class="pagination">
-                <button class="pagination-button" disabled><i class="fas fa-chevron-left"></i> 前へ</button>
-                <span class="page-indicator">1 / 1</span>
-                <button class="pagination-button" disabled>次へ <i class="fas fa-chevron-right"></i></button>
+
+            <div class="pagination" id="pagination-container" style="display: none;">
+                <button class="pagination-button" id="prev-page" disabled><i class="fas fa-chevron-left"></i>
+                    前へ</button>
+                <span class="page-indicator" id="page-info">1 / 1</span>
+                <button class="pagination-button" id="next-page" disabled>次へ <i
+                        class="fas fa-chevron-right"></i></button>
             </div>
-        {% else %}
-            <div class="no-results">
+
+            <div id="no-results-message" class="no-results"
+                style="display: {% if not cars %}flex{% else %}none{% endif %};">
                 <i class="fas fa-exclamation-circle"></i>
                 <p>条件に合う車が見つかりませんでした。条件を変更して再検索してください。</p>
-                <button class="reset-filters-button" onclick="document.getElementById('car-filter-form').reset();">
+                <button class="reset-filters-button"
+                    onclick="document.getElementById('car-filter-form').reset(); executeSearch(1);">
                     <i class="fas fa-redo"></i> 検索条件をリセット
                 </button>
             </div>
-        {% endif %}
-    </div>
-    
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>AI自動車診断について</h3>
-                <p>当サイトは車選びをAIでサポートする無料サービスです。</p>
-            </div>
-            <div class="footer-section">
-                <h3>お問い合わせ</h3>
-                <p><i class="fas fa-envelope"></i> info@example.com</p>
-            </div>
-            <div class="footer-section">
-                <h3>フォローする</h3>
-                <div class="social-links">
-                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AI自動車診断について</h3>
+                    <p>当サイトは車選びをAIでサポートする無料サービスです。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>お問い合わせ</h3>
+                    <p><i class="fas fa-envelope"></i> info@example.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>フォローする</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 AI自動車診断 - あなたに最適な車を見つけよう</p>
-        </div>
-    </footer>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI自動車診断 - あなたに最適な車を見つけよう</p>
+            </div>
+        </footer>
 
-    <!-- JavaScript読み込み -->
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/enhanced.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/hybrid.js') }}"></script>
+        <!-- JavaScript読み込み -->
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/enhanced.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/hybrid.js') }}"></script>
 </body>
+
 </html>
