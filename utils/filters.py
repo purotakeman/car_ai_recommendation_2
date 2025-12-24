@@ -257,7 +257,7 @@ class CarScraper:
             
             # 重複を避けるため、メーカーと車種で結合
             merged_df = pd.concat([existing_df, self.data], ignore_index=True)
-            merged_df = merged_df.drop_duplicates(subset=['メーカー', '車種'], keep='last')
+            merged_df = merged_df.drop_duplicates(subset=['メーカー', '車種','年式','モデル'], keep='last')
             
             # IDを振り直す
             merged_df['id'] = range(1, len(merged_df) + 1)
@@ -316,14 +316,20 @@ def clean_size_data(size_str):
 
 # スクリプトとして実行する場合
 if __name__ == "__main__":
-    print("車両データスクレイピングツールを開始します...")
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--confirm":
+        print("車両データスクレイピングツールを開始します...")
     
-    scraper = CarScraper(output_path="data/raw_data.csv")
+        scraper = CarScraper(output_path="data/raw_data.csv")
     
-    # デモデータを生成（実際のスクレイピングの代替）
-    scraper.scrape_simple_demo_data(limit=5)
+        # デモデータを生成（実際のスクレイピングの代替）
+        scraper.scrape_simple_demo_data(limit=5)
     
-    # 既存のCSVとマージ
-    scraper.merge_with_existing_csv(existing_csv_path="car_data.csv")
+        # 既存のCSVとマージ
+        scraper.merge_with_existing_csv(existing_csv_path="car_data.csv")
     
-    print("処理が完了しました。")
+        print("処理が完了しました。")
+
+    else:
+        print("安全のため、実行するには引数 '--confirm' を指定してください。")
+        print("例: python filters.py --confirm")

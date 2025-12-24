@@ -3,6 +3,8 @@ import pandas as pd
 import os
 import json
 from datetime import datetime
+from utils.youtube import get_car_videos
+
 
 # 推薦スコア計算モジュールをインポート
 from utils.recommendation import calculate_recommendation_scores
@@ -15,51 +17,124 @@ def load_car_data():
     車両データCSVファイルを読み込む
     複数のエンコーディングを試行して、文字化けを防ぐ
     """
-    try:
-        # UTF-8 BOM付きで読み込みを試す（Windows対応）
-        df = pd.read_csv("car_data.csv", encoding="utf-8-sig")
-    except:
-        try:
-            # UTF-8で読み込みを試す
-            df = pd.read_csv("car_data.csv", encoding="utf-8")
-        except:
-            try:
-                # Shift-Jisで読み込みを試す
-                df = pd.read_csv("car_data.csv", encoding="shift-jis")
-            except:
-                # CP932(Windows日本語)で読み込みを試す
-                df = pd.read_csv("car_data.csv", encoding="cp932")
-
-    # カラム名を手動で設定（CSVのヘッダーが正しく読み込まれない場合の対策）
-    expected_columns = [
-        'id', 'メーカー', '車種', 'ボディタイプ', '駆動方式', '価格(万円)', 
-        '排気量', '年式', 'モデル', '安全評価', '燃費(km/L)', '燃料の種類', 
-        '自動車税(円)', '乗車定員', '中古相場(万円)', 'サイズ(mm)'
-    ]
+    # ファイルパスを複数試行（新しいCSVファイル名に対応）
+    csv_paths = ["data/car_data_base.csv", "data/car_data.csv", "car_data_base.csv", "car_data.csv"]
+    df = None
     
-    # カラム数が一致する場合のみカラム名を設定
-    if len(df.columns) == len(expected_columns):
-        df.columns = expected_columns
+    for csv_path in csv_paths:
+            try:
+                # UTF-8 BOM付きで読み込みを試す（Windows対応）
+                df = pd.read_csv(csv_path, encoding="utf-8-sig")
+                break
+            except (FileNotFoundError, pd.errors.EmptyDataError):
+                continue # ファイルがない、または空の場合は次のパスへ
+            except UnicodeDecodeError:
+                try:
+                    # UTF-8で読み込みを試す
+                    df = pd.read_csv(csv_path, encoding="utf-8")
+                    break
+                except UnicodeDecodeError:
+                    try:
+                        # Shift-Jisで読み込みを試す
+                        df = pd.read_csv(csv_path, encoding="shift-jis")
+                        break
+                    except:
+                        # CP932(Windows日本語)で読み込みを試す
+                        df = pd.read_csv(csv_path, encoding="cp932")
+                        break
+                        pass
+                except Exception as e:
+                    print(f"予期せぬエラー: {e}")
+                    continue
+    
+    # ファイルが見つからない場合のエラーハンドリング
+    if df is None:
+        print("❌ 車両データCSVファイルが見つかりません")
+        print("   以下のパスを確認してください: data/car_data_base.csv")
+        # 空のデータフレームを返す
+        return []
+
+    # 新しいCSV構造のカラム名（カラム名が正しく読み込まれている場合はそのまま使用）
+    # カラム名にスペースが含まれる場合があるので、正規化
+    df.columns = df.columns.str.strip()
+    
+    # 燃費カラム名の正規化（「燃費(km/L)電費(Wh/km)水素燃費(km/kg)」を「燃費(km/L)」に統一）
+    if '燃費(km/L)電費(Wh/km)水素燃費(km/kg)' in df.columns:
+        df.rename(columns={'燃費(km/L)電費(Wh/km)水素燃費(km/kg)': '燃費(km/L)'}, inplace=True)
+    
+    # 最新モデルカラム名の正規化（スペースを含む可能性）
+    if '最新モデル 発表年月' in df.columns:
+        df.rename(columns={'最新モデル 発表年月': '最新モデル'}, inplace=True)
     
     # 数値データの型変換（エラー処理込み）
-    numeric_columns = ['価格(万円)', '燃費(km/L)', '自動車税(円)', '乗車定員', '排気量', '年式', '安全評価']
+    numeric_columns = ['自動車税(円)', '乗車定員', '排気量(cc)']
+    # 排気量カラム名の確認
+    if '排気量(cc)' not in df.columns and '排気量' in df.columns:
+        numeric_columns.append('排気量')
+    
     for col in numeric_columns:
         if col in df.columns:
             # pd.to_numeric()で数値に変換、errors='coerce'により変換できないデータはNaN（欠損値）になる
             df[col] = pd.to_numeric(df[col], errors='coerce')
+            # NaN値を適切なデフォルト値で置換
+            df[col] = df[col].fillna(0)
+            # 整数値として扱うべきカラムを整数型にキャスト（小数点 .0 を防ぐ）
+            if col in ['自動車税(円)', '乗車定員', '排気量(cc)', '排気量']:
+                df[col] = df[col].astype(int)
+        if '燃費(km/L)' in df.columns:
+            # 欠損値を0埋めするが、文字列(範囲データ)はそのまま残す
+            df['燃費(km/L)'] = df['燃費(km/L)'].fillna(0)
     
     # 不足データを適切な形式で埋める
     # fillna()で空白のデータを適切な値で埋める。データが不完全でもアプリが正常に動作するようにする
-    if 'ボディタイプ' in df.columns:
-        df['ボディタイプ'].fillna('不明', inplace=True)
-    if '駆動方式' in df.columns:
-        df['駆動方式'].fillna('不明', inplace=True)
-    if '燃料の種類' in df.columns:
-        df['燃料の種類'].fillna('ガソリン', inplace=True)
-    if 'モデル' in df.columns:
-        df['モデル'].fillna('', inplace=True)
+    string_columns = ['メーカー', '車種', 'ボディタイプ', '駆動方式', '燃料の種類', 'グレード・モデル', '価格帯(万円)', '先進安全装備']
+    for col in string_columns:
+        if col in df.columns:
+            if col == 'ボディタイプ':
+                df[col].fillna('不明', inplace=True)
+            elif col == '駆動方式':
+                df[col].fillna('不明', inplace=True)
+            elif col == '燃料の種類':
+                df[col].fillna('ガソリン', inplace=True)
+            elif col == 'グレード・モデル':
+                df[col].fillna('', inplace=True)
+            elif col == '先進安全装備':
+                df[col].fillna('NO', inplace=True)
+            else:
+                df[col].fillna('未定', inplace=True)
+    
+    # データ型の安全性を確保（NaN値を文字列に変換）
+    for col in df.columns:
+        if col not in numeric_columns:
+            df[col] = df[col].astype(str).replace('nan', '未定')
+
+            # 追加: 燃料の種類の表記漏れを統一(スペースを削除)
+            # 追加: 燃料の種類の表記漏れを統一(スペースを削除)
+            if col == '燃料の種類':
+                df[col] = df[col].str.replace(' (', '(', regex=False)
+                
+                # 燃料タイプの正規化は最小限（スペースの統一のみ）にとどめる
+                # index.html の値と一致させるため、スペースありを括弧直結にする
+                df[col] = df[col].str.replace(' (', '(', regex=False)
+                # ユーザーの要望により、レギュラー、ハイオク、HEVなどを統合せず個別に扱う
+                
+                # 特定の複合パターン（レギュラー(HEV)などは上のHEVルールでハイブリッドになるが、念のため）
 
     return df.to_dict(orient="records")  # 辞書型リストに変換
+
+# 価格帯から最小・最大価格を抽出する関数
+def parse_price_range(price_range_str):
+    if not price_range_str or '~' not in str(price_range_str):
+        try:
+            val = float(price_range_str)
+            return val, val
+        except:
+            return None, None
+    try:
+        min_p, max_p = price_range_str.split('~')
+        return float(min_p), float(max_p)
+    except:
+        return None, None
 
 # メインルート: 検索ページと結果表示
 @app.route("/", methods=["GET", "POST"])
@@ -69,16 +144,32 @@ def home():
     GET: 初期表示
     POST: 検索条件による車両フィルタリングと推薦
     """
-    cars = load_car_data()
-    
-    # 利用可能なフィルタリング条件の選択肢を取得
-    filter_options = get_filter_options(cars)
+    try:
+        cars = load_car_data()
+        
+        # データが空の場合のエラーハンドリング
+        if not cars:
+            print("⚠️  車両データが読み込めませんでした")
+            cars = []
+        
+        # 利用可能なフィルタリング条件の選択肢を取得
+        filter_options = get_filter_options(cars)
+    except Exception as e:
+        print(f"❌ データ読み込みエラー: {e}")
+        cars = []
+        filter_options = {
+            'body_types': [],
+            'drive_types': [],
+            'fuel_types': []
+        }
 
     if request.method == "POST":
         # ユーザーの入力を取得
         body_types = request.form.getlist("body_type")
         drive_types = request.form.getlist("drive_type")
         fuel_types = request.form.getlist("fuel_type")
+        
+
         max_price = request.form.get("max_price")
         
         # 新しい条件を追加（燃費、乗車定員）
@@ -107,63 +198,34 @@ def home():
 
         # フィルタリング処理
         filtered_cars = []
-        for car in cars:
-            # ボディタイプのフィルタリング
-            if body_types and car.get("ボディタイプ") not in body_types:
-                continue
+        # フィルタリング基準の作成
+        filter_criteria = {
+            'body_types': body_types,
+            'drive_types': drive_types,
+            'fuel_types': fuel_types,
+            'max_price': max_price,
+            'min_fuel_economy': min_fuel_economy,
+            'min_seats': min_seats
+        }
+        
 
-            # 駆動方式のフィルタリング
-            if drive_types and car.get("駆動方式") not in drive_types:
-                continue
-
-            # 燃料タイプのフィルタリング
-            if fuel_types and car.get("燃料の種類") not in fuel_types:
-                continue
-
-            # 上限価格のフィルタリング
-            if max_price and max_price.strip():
-                try:
-                    car_price = float(car.get("価格(万円)", 0))
-                    max_price_val = float(max_price)
-                    if car_price > max_price_val:
-                        continue
-                except (ValueError, TypeError):
-                    # 価格データが不正な場合はスキップしない
-                    pass
-            
-            # 燃費のフィルタリング（新規追加）
-            if min_fuel_economy and min_fuel_economy.strip() and car.get("燃費(km/L)"):
-                try:
-                    car_fuel = float(car["燃費(km/L)"])
-                    min_fuel_val = float(min_fuel_economy)
-                    if car_fuel < min_fuel_val:
-                        continue
-                except (ValueError, TypeError):
-                    # 値が変換できない場合は条件を無視
-                    pass
-            
-            # 乗車定員のフィルタリング（新規追加）
-            if min_seats and min_seats.strip() and car.get("乗車定員"):
-                try:
-                    car_seats = int(float(car["乗車定員"]))
-                    min_seats_val = int(min_seats)
-                    if car_seats < min_seats_val:
-                        continue
-                except (ValueError, TypeError):
-                    # 値が変換できない場合は条件を無視
-                    pass
-            
-            filtered_cars.append(car)
+        # 共通関数でフィルタリング
+        filtered_cars = filter_cars(cars, filter_criteria)
         
         # 推薦スコアを計算してソート
         if filtered_cars:
             try:
                 filtered_cars = calculate_recommendation_scores(filtered_cars, user_preferences)
+                
+                # 車種の重複排除（同一車種の別グレードを表示しない）
+                filtered_cars = deduplicate_cars(filtered_cars)
             except Exception as e:
                 # 推薦計算でエラーが発生した場合のフォールバック
                 print(f"推薦計算エラー: {e}")
-                # 基本的なソート（価格順）にフォールバック
-                filtered_cars.sort(key=lambda x: float(x.get('価格(万円)', 999)), reverse=False)
+                # 基本的なソート（価格帯の最小値順）にフォールバック
+                filtered_cars.sort(key=lambda x: parse_price_range(x.get('価格帯(万円)', ''))[0] if parse_price_range(x.get('価格帯(万円)', ''))[0] is not None else 9999, reverse=False)
+                # フォールバック後も重複排除を適用
+                filtered_cars = deduplicate_cars(filtered_cars)
         
         # 検索条件をテンプレートに渡す（検索フォームの状態保持のため）
         search_params = {
@@ -177,6 +239,12 @@ def home():
             'experience_level': experience_level
         }
 
+        for car in filtered_cars[:10]:
+            videos = get_car_videos(car.get('メーカー'), car.get('車種'), count=1)
+            if videos:
+                car['youtube_url'] = videos[0]['url']
+                car['youtube_thumbnail'] = videos[0]['thumbnail']
+
         return render_template(
             "index.html", 
             cars=filtered_cars, 
@@ -185,9 +253,9 @@ def home():
             show_recommendation_details=True  # 推薦詳細を表示するフラグ
         )
     
-    # GETリクエストの場合はデフォルトのソート（メーカー順など）
-    cars.sort(key=lambda x: (x.get("メーカー", ""), x.get("車種", "")))
-    return render_template("index.html", cars=cars, filter_options=filter_options)
+    # GETリクエストの場合は初期表示（車両データは表示しない）
+    # 初期表示時は車両データを渡さず、検索実行後のみ表示する
+    return render_template("index.html", cars=[], filter_options=filter_options)
 
 # 利用可能なフィルタリング条件を取得する
 def get_filter_options(cars):
@@ -204,6 +272,14 @@ def get_filter_options(cars):
     dict
         フィルタリング条件の辞書
     """
+    # 空のデータの場合はデフォルト値を返す
+    if not cars:
+        return {
+            'body_types': [],
+            'drive_types': [],
+            'fuel_types': []
+        }
+    
     # 各カテゴリの一意値を取得し、ソート
     body_types = sorted(list(set([
         car.get('ボディタイプ', '') for car in cars 
@@ -247,24 +323,51 @@ def car_detail(car_id):
     car = next((c for c in cars if int(c.get("id", 0)) == car_id), None)
     
     if car:
+
         # 関連する推薦車両を取得 (同じボディタイプか同じメーカーの車)
         related_cars = []
         car_body_type = car.get("ボディタイプ", "")
         car_maker = car.get("メーカー", "")
+        seen_related_models = {f"{car_maker.strip().upper()}_{car.get('車種', '').strip().upper()}"}
         
         for other_car in cars:
             other_id = other_car.get("id")
             other_body_type = other_car.get("ボディタイプ", "")
             other_maker = other_car.get("メーカー", "")
+            other_model = other_car.get("車種", "")
             
-            # 同じ車両は除外し、ボディタイプかメーカーが一致する車両を関連車両とする
-            if (other_id != car.get("id") and 
+            # モデル識別子
+            other_model_id = f"{str(other_maker).strip().upper()}_{str(other_model).strip().upper()}"
+            
+            # 重複（自身も含む）を除外し、ボディタイプかメーカーが一致する車両を選択
+            if (other_model_id not in seen_related_models and 
                 (other_body_type == car_body_type or other_maker == car_maker)):
                 related_cars.append(other_car)
-                if len(related_cars) >= 3:  # 関連車両は最大3台まで
+                seen_related_models.add(other_model_id)
+                if len(related_cars) >= 5:  # 関連車両は最大5台まで
                     break
         
-        return render_template("car_detail.html", car=car, related_cars=related_cars)
+        # グレードバリエーションの取得（同メーカー、同車種の車）
+        grade_variations = []
+        for other_car in cars:
+            # 自身は除外
+            if other_car.get("id") == car.get("id"):
+                continue
+                
+            # メーカーと車種が一致するものを収集
+            if (other_car.get("メーカー") == car_maker and 
+                other_car.get("車種") == car.get("車種")):
+                grade_variations.append(other_car)
+                
+        # YouTube動画情報を取得 (最大5件)
+        car['youtube_videos'] = get_car_videos(car_maker, car.get("車種"), count=5)
+        if car['youtube_videos']:
+            # 互換性のため、1番目の要素を個別のキーにも設定（他で使われている可能性があるため）
+            car['youtube_url'] = car['youtube_videos'][0]['url']
+            car['youtube_thumbnail'] = car['youtube_videos'][0]['thumbnail']
+            car['youtube_title'] = car['youtube_videos'][0]['title']
+            
+        return render_template("car_detail.html", car=car, related_cars=related_cars, grade_variations=grade_variations)
     else:
         # 車両が見つからない場合は404エラー
         abort(404)
@@ -291,7 +394,10 @@ def api_get_cars():
     if max_price:
         try:
             max_price_value = float(max_price)
-            cars = [car for car in cars if float(car.get('価格(万円)', 0)) <= max_price_value]
+            def price_in_range(car):
+                min_p, max_p = parse_price_range(car.get('価格帯(万円)', ''))
+                return min_p is not None and min_p <= max_price_value
+            cars = [car for car in cars if price_in_range(car)]
         except ValueError:
             # 不正な価格パラメータは無視
             pass
@@ -329,31 +435,102 @@ def api_recommend():
     フロントエンドからの推薦リクエストを処理
     """
     try:
+        print("API推薦リクエスト受信")
+        if not request.is_json:
+            return jsonify({'success': False, 'error': 'Content-Type must be application/json'}), 400
+        
         data = request.get_json()
+        print(f"受信データ: {data}")
+        
+        if not data:
+            print("❌ リクエストデータが空です")
+            return jsonify({
+                'success': False,
+                'error': 'リクエストデータが空です',
+                'diagnosis_type': 'unknown'
+            }), 400
+        
         cars = load_car_data()
+        print(f"車両データ読み込み完了: {len(cars)}台")
+        
+        if not cars:
+            print("❌ 車両データが読み込めませんでした")
+            return jsonify({
+                'success': False,
+                'error': '車両データが読み込めませんでした',
+                'diagnosis_type': 'unknown'
+            }), 500
         
         # ハイブリッド診断からのデータかチェック
-        is_hybrid_diagnosis = 'user_profile' in data
+        is_hybrid_diagnosis = data.get('is_hybrid_diagnosis', 'user_profile' in data)
+        is_detailed_search = data.get('is_detailed_search', False)
+        page = int(data.get('page', 1))
+        per_page = int(data.get('per_page', 12)) if is_detailed_search else 20
         
         if is_hybrid_diagnosis:
             # ハイブリッド診断用の拡張処理
             enhanced_data = enhance_hybrid_preferences(data)
             print(f"ハイブリッド診断データ受信: {data}")
-            print(f"拡張後のデータ: {enhanced_data}")
         else:
-            # 従来の簡単診断データ
             enhanced_data = data
         
-        # 推薦計算
-        recommended_cars = calculate_recommendation_scores(cars, enhanced_data)
+        # 推薦計算または単なるフィルタリング
+        try:
+            # 1. フィルタリング（条件による絞り込み）
+            filtered_cars = filter_cars(cars, enhanced_data)
+            print(f"フィルタリング後: {len(filtered_cars)}台")
+            
+            if is_detailed_search:
+                # 詳細検索の場合は推薦スコアを計算しない
+                # 代わりにIDやメーカーなどで安定した並び順にする
+                recommended_cars = sorted(filtered_cars, key=lambda x: int(x.get('id', 0)))
+                # 車種の重複排除を適用
+                recommended_cars = deduplicate_cars(recommended_cars)
+                # スコアを明示的にクリア
+                for car in recommended_cars:
+                    if '推薦スコア' in car:
+                        del car['推薦スコア']
+                    if '推薦理由' in car:
+                        del car['推薦理由']
+            else:
+                # スマート診断（従来またはハイブリッド）の場合はスコア計算
+                recommended_cars = calculate_recommendation_scores(filtered_cars, enhanced_data)
+                # 車種の重複排除
+                recommended_cars = deduplicate_cars(recommended_cars)
+            
+            print(f"結果確定: {len(recommended_cars)}台")
+        except Exception as e:
+            print(f"❌ 処理エラー: {e}")
+            return jsonify({
+                'success': False,
+                'error': f'エラーが発生しました: {str(e)}',
+                'diagnosis_type': 'unknown'
+            }), 500
         
-        # ハイブリッド診断の場合は追加情報を含める
+        # ページネーション処理
+        total_count = len(recommended_cars)
+        if is_detailed_search:
+            # 詳細検索は12件ずつのページネーション
+            start_idx = (page - 1) * per_page
+            end_idx = start_idx + per_page
+            display_cars = recommended_cars[start_idx:end_idx]
+            total_pages = (total_count + per_page - 1) // per_page
+            
+            # デバッグ用
+            print(f"Detailed Search: Page {page}, PerPage {per_page}, Total {total_count}, TotalPages {total_pages}, DisplayCars {len(display_cars)}")
+        else:
+            # スマート診断は上位20台
+            display_cars = recommended_cars[:20]
+            total_pages = 1
+
         response_data = {
             'success': True,
-            'cars': recommended_cars[:10],  # 上位10台
-            'total': len(recommended_cars),
+            'cars': display_cars,
+            'total': total_count,
+            'page': page,
+            'total_pages': total_pages,
             'user_profile': enhanced_data.get('user_profile', 'general'),
-            'diagnosis_type': 'hybrid' if is_hybrid_diagnosis else 'simple'
+            'diagnosis_type': 'hybrid' if is_hybrid_diagnosis else ('detailed' if is_detailed_search else 'simple')
         }
         
         if is_hybrid_diagnosis:
@@ -363,7 +540,13 @@ def api_recommend():
                 'top_factors': get_top_recommendation_factors(enhanced_data),
                 'alternative_profiles': get_alternative_profiles(enhanced_data)
             }
-        
+
+        for car in response_data['cars']:
+            videos = get_car_videos(car.get('メーカー'), car.get('車種'), count=1)
+            if videos:
+                car['youtube_url'] = videos[0]['url']
+                car['youtube_thumbnail'] = videos[0]['thumbnail']
+                
         return jsonify(response_data)
     
     except Exception as e:
@@ -397,8 +580,8 @@ def enhance_hybrid_preferences(hybrid_data):
     fuel_importance = float(hybrid_data.get('fuel_economy_importance', 0.6))
     if fuel_importance >= 0.8:
         enhanced['min_fuel_economy'] = enhanced.get('min_fuel_economy', '18')
-        if 'fuel_types' not in enhanced:
-            enhanced['fuel_types'] = ['ハイブリッド', 'EV']
+        # プロファイルのデフォルトよりも厳しい燃料タイプ制限を適用
+        enhanced['fuel_types'] = ['(HEV)', '(PHEV)', '電気(BEV)', '水素']
     elif fuel_importance >= 0.6:
         enhanced['min_fuel_economy'] = enhanced.get('min_fuel_economy', '15')
     
@@ -416,7 +599,7 @@ def enhance_hybrid_preferences(hybrid_data):
     space_importance = float(hybrid_data.get('space_importance', 0.6))
     if space_importance >= 0.8:
         if 'body_types' not in enhanced:
-            enhanced['body_types'] = ['ミニバン', 'SUV']
+            enhanced['body_types'] = ['ミニバン', 'SUV', 'ワゴン']
         enhanced['preferred_size'] = 'large'
     elif space_importance <= 0.4:
         enhanced['preferred_size'] = 'small'
@@ -427,7 +610,164 @@ def enhance_hybrid_preferences(hybrid_data):
         enhanced['max_tax'] = '30000'  # 新しいフィールド
         enhanced['prefer_low_maintenance'] = True  # 新しいフィールド
     
+
+    # 【修正】5人以上乗る場合や大型希望の場合は、ハッチバックを除外する（コンパクトカーが選ばれるのを防ぐため）
+    # ただし、ユーザーが明示的にハッチバックだけを指定している場合は除く
+    # APIからのmin_seatsは文字列の可能性があるため安全に変換
+    try:
+        min_seats_val = int(enhanced.get('min_seats', 0)) if enhanced.get('min_seats') else 0
+    except (ValueError, TypeError):
+        min_seats_val = 0
+        
+    if (enhanced.get('preferred_size') == 'large' or min_seats_val >= 5):
+        current_body_types = enhanced.get('body_types', [])
+        if current_body_types and 'ハッチバック' in current_body_types:
+            # 他のボディタイプがある場合のみ削除（ハッチバックしかない場合は残す）
+            if len(current_body_types) > 1:
+                enhanced['body_types'] = [bt for bt in current_body_types if bt != 'ハッチバック']
+                print(f"大型希望/多人数乗車のためハッチバックを除外しました: {enhanced['body_types']}")
+
     return enhanced
+
+def deduplicate_cars(cars):
+    """
+    同一車種（メーカー＋車種名）の重複を排除し、
+    リストの中で最初に出現した（最もスコアが高い）1台のみを保持する
+    """
+    unique_cars = []
+    seen_models = set()
+    
+    for car in cars:
+        # メーカー名と車種名を正規化（前後スペース除去、大文字化）
+        # これにより微細な表記揺れ（「TOYOTA 」と「Toyota」など）があっても正しく同一視する
+        m = str(car.get('メーカー', '')).strip().upper()
+        s = str(car.get('車種', '')).strip().upper()
+        car_identifier = f"{m}_{s}"
+        
+        if car_identifier not in seen_models:
+            seen_models.add(car_identifier)
+            unique_cars.append(car)
+            
+    return unique_cars
+
+def filter_cars(cars, criteria):
+    """
+    車両データを条件に基づいてフィルタリングする共通関数
+    
+    Parameters:
+    -----------
+    cars : list
+        フィルタリング対象の車両リスト
+    criteria : dict
+        フィルタリング条件（body_types, fuel_types, max_price, min_fuel_economy, min_seatsなど）
+        
+    Returns:
+    --------
+    list
+        フィルタリングされた車両リスト
+    """
+    filtered = []
+    
+    # 条件の抽出（単数形・複数形の両方のキーに対応）
+    body_types = criteria.get('body_types') or criteria.get('body_type')
+    drive_types = criteria.get('drive_types') or criteria.get('drive_type')
+    fuel_types = criteria.get('fuel_types') or criteria.get('fuel_type')
+    max_price = criteria.get('max_price')
+    min_fuel_economy = criteria.get('min_fuel_economy')
+    min_seats = criteria.get('min_seats')
+    
+    # リスト形式でない場合はリストに変換（文字列が1つだけ送られてきた場合などの対策）
+    def ensure_list(val):
+        if val is None: return []
+        if isinstance(val, list): return val
+        return [str(val)]
+
+    body_types = ensure_list(body_types)
+    drive_types = ensure_list(drive_types)
+    fuel_types = ensure_list(fuel_types)
+
+    for car in cars:
+        # ボディタイプのフィルタリング
+        if body_types and car.get("ボディタイプ") not in body_types:
+            continue
+
+        # 駆動方式のフィルタリング
+        if drive_types:
+            car_drive = car.get("駆動方式", "")
+            match = False
+            for dt in drive_types:
+                if dt == car_drive or dt in car_drive:
+                    match = True
+                    break
+            if not match:
+                continue
+
+        # 燃料タイプのフィルタリング
+        if fuel_types:
+            car_fuel = car.get("燃料の種類", "")
+            # リストのいずれかに一致するか確認（部分一致も許容して堅牢にする）
+            match = False
+            for ft in fuel_types:
+                if ft == car_fuel or ft in car_fuel:
+                    match = True
+                    break
+            if not match:
+                continue
+
+        # 上限価格のフィルタリング
+        if max_price:
+            try:
+                min_p, max_p = parse_price_range(car.get('価格帯(万円)', ''))
+                max_price_val = float(max_price)
+                
+                # 価格単位の補正（データが円単位で、入力が万円単位の場合）
+                # 10000以上なら円単位とみなして万円に変換
+                if min_p > 10000:
+                    min_p = min_p / 10000
+                    
+                if min_p is not None and min_p > max_price_val:
+                    continue
+            except (ValueError, TypeError):
+                pass
+        
+        # 燃費のフィルタリング
+        if min_fuel_economy:
+            try:
+                if car.get("燃費(km/L)"):
+                    car_fuel = float(car["燃費(km/L)"])
+                    min_fuel_val = float(min_fuel_economy)
+                    if car_fuel < min_fuel_val:
+                        continue
+            except (ValueError, TypeError):
+                pass
+        
+        # 乗車定員のフィルタリング
+        if min_seats:
+            try:
+                # 文字列型で来る可能性も考慮
+                min_seats_val = int(min_seats)
+                
+                # 車両データの乗車定員を取得（数値が含まれているか確認）
+                car_seats_val = 0
+                if car.get("乗車定員"):
+                    import re
+                    seats_str = str(car["乗車定員"])
+                    # "5名" "5" "7~8人" などの形式に対応
+                    seats_match = re.search(r'(\d+)', seats_str)
+                    if seats_match:
+                        car_seats_val = int(seats_match.group(1))
+                
+                # 定員が不明(0)の場合は除外しない（安全側）か、厳密にするか
+                # ここではデータがある場合のみチェックする
+                if car_seats_val > 0 and car_seats_val < min_seats_val:
+                    continue
+                    
+            except (ValueError, TypeError):
+                pass
+        
+        filtered.append(car)
+        
+    return filtered
 
 def calculate_profile_confidence(preferences):
     """
@@ -571,21 +911,17 @@ def compare_cars():
     複数の車両を並べて比較表示
     """
     car_ids = request.args.getlist('ids')
-    if not car_ids:
-        return redirect(url_for('home'))
-    
     cars = load_car_data()
-    selected_cars = [car for car in cars if str(car.get('id', '')) in car_ids]
-    
-    if not selected_cars:
-        return redirect(url_for('home'))
-    
-    # 比較用データの準備
-    comparison_data = prepare_comparison_data(selected_cars)
-    
-    return render_template("car_compare.html", 
-                         cars=selected_cars,
-                         comparison_data=comparison_data)
+    selected_cars = [car for car in cars if str(car.get('id', '')) in car_ids] if car_ids else []
+
+    # 比較用データの準備（選択がある場合のみ）
+    comparison_data = prepare_comparison_data(selected_cars) if selected_cars else {}
+
+    return render_template(
+        "car_compare.html",
+        cars=selected_cars,
+        comparison_data=comparison_data
+    )
 
 def prepare_comparison_data(cars):
     """
@@ -614,18 +950,32 @@ def prepare_comparison_data(cars):
         car_name = f"{car.get('メーカー', '')} {car.get('車種', '')}"
         
         # 詳細スコアがある場合は使用、なければ簡易計算
-        if 'detailed_scores' in car:
+        if '詳細スコア' in car:
+            scores = car['詳細スコア']
+        elif 'detailed_scores' in car:
             scores = car['detailed_scores']
         else:
             # 簡易スコア計算
-            price = float(car.get('価格(万円)', 300))
+            min_p, max_p = parse_price_range(car.get('価格帯(万円)', ''))
+            price = min_p if min_p is not None else 300
             fuel_economy = float(car.get('燃費(km/L)', 15))
-            safety = float(car.get('安全評価', 3))
+            
+            # 安全スコアはメーカーと先進安全装備から計算（簡易版）
+            maker = car.get('メーカー', '').upper()
+            safety_equipment = str(car.get('先進安全装備', '')).strip()
+            maker_safety_scores = {
+                'SUBARU': 95, 'VOLVO': 95, 'TOYOTA': 90, 'TOYOYA': 90,
+                'HONDA': 90, 'MAZDA': 88, 'NISSAN': 85, 'MITSUBISHI': 85,
+                'SUZUKI': 80, 'DAIHATSU': 80
+            }
+            maker_score = maker_safety_scores.get(maker, 75)
+            equipment_score = 90 if safety_equipment and safety_equipment.upper() != 'NO' else 50
+            safety = int(maker_score * 0.7 + equipment_score * 0.3)
             
             scores = {
                 'price': min(100, int(500 / max(1, price) * 100)),  # 安いほど高スコア
                 'fuel_economy': min(100, int(fuel_economy * 4)),     # 燃費の4倍をスコア
-                'safety': int(safety * 20),                         # 5段階を100点満点に
+                'safety': safety,                                    # メーカー+装備から計算
                 'maintenance': 70,  # デフォルト値
                 'brand': 80,       # デフォルト値
                 'environmental': 60  # デフォルト値
@@ -664,11 +1014,49 @@ def utility_processor():
     def format_currency(value):
         """
         数値を通貨形式でフォーマット
+        10000以上の値は万円単位に変換して表示
         """
         try:
             if pd.isna(value) or value == '' or value is None:
                 return "0"
-            return f"{int(float(value)):,}"
+
+            # 文字列にして処理
+            str_val = str(value).strip()
+            
+            # 正規化：全角チルダ、波ダッシュを半角チルダに
+            str_val = str_val.replace('～', '~').replace('〜', '~')
+
+            def format_single_value(v_str):
+                try:
+                    # カンマ、単位などを除去して数値変換
+                    clean_str = str(v_str).replace(',', '').replace('万円', '').replace('円', '').strip()
+                    if not clean_str:
+                        return v_str
+                        
+                    v = float(clean_str)
+                    
+                    # 100,000以上の値は円単位とみなして万円に変換（価格表示用）
+                    # ただし、コンテキストによっては円単位のままにしたい場合があるが、
+                    # 現在のデータ構造では価格（万円）フィールドに円が入っているケースに対応
+                    if v >= 100000:
+                        v = v / 10000
+                        
+                    # 整数なら整数表示、小数なら小数点1桁まで
+                    if v.is_integer():
+                        return f"{int(v):,}"
+                    else:
+                        return f"{v:,.1f}"
+                except (ValueError, TypeError):
+                    return v_str
+
+            # 「~」が含まれている場合は分割して処理
+            if '~' in str_val:
+                parts = str_val.split('~')
+                formatted_parts = [format_single_value(p) for p in parts]
+                return '～'.join(formatted_parts) 
+
+            return format_single_value(str_val)
+            
         except (ValueError, TypeError):
             return str(value) if value is not None else "0"
             
@@ -704,24 +1092,31 @@ if __name__ == "__main__":
     print("="*50)
     
     # CSVファイルの存在確認
-    if os.path.exists('car_data.csv'):
-        try:
-            cars = load_car_data()
-            print(f"✅ 車両データ読み込み成功: {len(cars)}台")
-            
-            # データ品質チェック
-            makers = set(car.get('メーカー', '') for car in cars if car.get('メーカー'))
-            body_types = set(car.get('ボディタイプ', '') for car in cars if car.get('ボディタイプ'))
-            
-            print(f"📊 メーカー数: {len(makers)}")
-            print(f"📊 ボディタイプ数: {len(body_types)}")
-            
-        except Exception as e:
-            print(f"❌ データ読み込みエラー: {e}")
-    else:
-        print("⚠️  car_data.csv が見つかりません")
-        print("   以下のコマンドでサンプルデータを作成してください:")
-        print("   python -c \"import pandas as pd; pd.DataFrame([{'id':1,'メーカー':'トヨタ','車種':'プリウス','ボディタイプ':'ハッチバック','駆動方式':'2WD','価格(万円)':250,'燃費(km/L)':32.6,'燃料の種類':'ハイブリッド','自動車税(円)':34500,'乗車定員':5}]).to_csv('car_data.csv', index=False, encoding='utf-8-sig')\"")
+    csv_paths = ["data/car_data_base.csv", "data/car_data.csv", "car_data_base.csv", "car_data.csv"]
+    csv_found = False
+    for csv_path in csv_paths:
+        if os.path.exists(csv_path):
+            csv_found = True
+            try:
+                cars = load_car_data()
+                print(f"✅ 車両データ読み込み成功: {len(cars)}台 (ファイル: {csv_path})")
+                
+                # データ品質チェック
+                makers = set(car.get('メーカー', '') for car in cars if car.get('メーカー'))
+                body_types = set(car.get('ボディタイプ', '') for car in cars if car.get('ボディタイプ'))
+                
+                print(f"📊 メーカー数: {len(makers)}")
+                print(f"📊 ボディタイプ数: {len(body_types)}")
+                
+            except Exception as e:
+                print(f"❌ データ読み込みエラー: {e}")
+            break
+    
+    if not csv_found:
+        print("⚠️  車両データCSVファイルが見つかりません")
+        print("   以下のパスを確認してください:")
+        for path in csv_paths:
+            print(f"   - {path}")
     
     print("="*50)
     print("🌐 アクセス先: http://localhost:5000/")

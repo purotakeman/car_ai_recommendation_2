@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple
 import logging
+import re
 
 # ログ設定
 logging.basicConfig(level=logging.INFO)
@@ -21,12 +22,35 @@ class EnhancedCarRecommendationEngine:
     改善された車両推薦エンジン
     """
 
+    # 安全装備のスコアマッピング
+    SAFETY_EQUIPMENT_SCORES = {
+        # Tier 1: 最先端・高度な安全装備 (95-100)
+        'アイサイトX': 100,
+        'HONDA SENSING360+': 100,
+        'HONDA SENSING360': 98,
+        '360°セーフティアシスト': 95,
+        'Toyota Safety Sense': 90, # 文脈によりTier 2上限だが、高性能なものとして扱う
+        
+        # Tier 2: 標準的な先進安全装備 (85-90)
+        'アイサイト': 90,
+        'HONDA SENSING': 90,
+        'SUBARU Safety Sense': 90,
+        'i-ACTIVSENSE': 88,
+        'e-Assist': 85,
+        'スマートアシスト': 85,
+        'スマートアシストⅢ': 85,
+        
+        # Tier 3: 装備なし・その他 (40-50)
+        'NO': 40,
+        '': 50
+    }
+
     def __init__(self):
         # ユーザープロファイル定義
         self.user_profiles = {
             'family': { # ファミリー向け
                 'priorities': {
-                    'safety':0.25,     # 安全性重視
+                    'safety': 0.25,     # 安全性重視
                     'space': 0.20,     # 室内空間重視
                     'fuel_economy': 0.20, # 燃費重視
                     'price' : 0.15,       # 価格重視
@@ -81,18 +105,11 @@ class EnhancedCarRecommendationEngine:
         # ブランド階層（信頼性・ブランド力の評価用）
         self.brand_tiers = {
             'premium': ['レクサス', 'メルセデス・ベンツ', 'BMW', 'アウディ', 'ボルボ'],
-            'mainstream': ['トヨタ', 'ホンダ', '日産', 'マツダ', 'スバル'],
-            'value': ['ダイハツ', 'スズキ', '三菱'],
+            'mainstream': ['トヨタ', 'ホンダ', '日産', 'マツダ', 'スバル', 'TOYOTA', 'HONDA', 'NISSAN', 'MAZDA', 'SUBARU', 'TOYOYA', 'MISSUBISHI', 'MITSUBISHI'],
+            'value': ['ダイハツ', 'スズキ', '三菱', 'DAIHATSU', 'SUZUKI'],
             'specialty': ['テスラ', 'ポルシェ', 'フェラーリ']
         }
     
-
-
-
-
-
-
-
 
     def calculate_enhanced_recommendation_scores(self, cars: List[Dict], user_preferences: Dict) -> List[Dict]:
         """
@@ -121,7 +138,8 @@ class EnhancedCarRecommendationEngine:
         
         for car in cars:
             detailed_scores = self._calculate_detailed_scores(car, user_preferences, user_profile)
-            final_score = self._calculate_weighted_final_score(detailed_scores, user_profile)
+            # user_preferencesを渡して動的重み付けを行う
+            final_score = self._calculate_weighted_final_score(detailed_scores, user_profile, user_preferences)
             
             # 車両情報にスコア情報を追加
             enhanced_car = car.copy()
@@ -141,113 +159,208 @@ class EnhancedCarRecommendationEngine:
         """
         ユーザーの嗜好からプロファイルを特定
         """
-        # 選択されたボディタイプや価格帯からプロファイルを推測
-        body_types = user_preferences.get('body_types', [])
-        max_price = float(user_preferences.get('max_price', 500)) if user_preferences.get('max_price') else 500
-        min_seats = int(user_preferences.get('min_seats', 2)) if user_preferences.get('min_seats') else 2
-        fuel_types = user_preferences.get('fuel_types', [])
+        try:
+            # 選択されたボディタイプや価格帯からプロファイルを推測
+            body_types = user_preferences.get('body_types', [])
+            
+            # 安全な数値変換
+            try:
+                max_price = float(user_preferences.get('max_price', 500)) if user_preferences.get('max_price') else 500
+            except (ValueError, TypeError):
+                max_price = 500
+                
+            try:
+                min_seats = int(user_preferences.get('min_seats', 2)) if user_preferences.get('min_seats') else 2
+            except (ValueError, TypeError):
+                min_seats = 2
+                
+            fuel_types = user_preferences.get('fuel_types', [])
+            
+            # 重要度スライダーの取得
+            importance = self._get_importance_values(user_preferences)
+            
+            profile_scores = {}
+            
+            # ファミリー向け判定
+            family_score = 0
+            if min_seats >= 5:
+                family_score += 30
+            if any(bt in ['ミニバン', 'SUV'] for bt in body_types):
+                family_score += 20
+            if max_price <= 400:
+                family_score += 10
+            # 重要度による加点
+            if importance.get('safety', 3) >= 4:
+                family_score += 15
+            if importance.get('space', 3) >= 4:
+                family_score += 15
+                
+            profile_scores['family'] = family_score
+            
+            # 通勤向け判定
+            commuter_score = 0
+            if max_price <= 300:
+                commuter_score += 25
+            if any(bt in ['ハッチバック', '軽自動車'] for bt in body_types):
+                commuter_score += 20
+            # 重要度による加点
+            if importance.get('fuel_economy', 3) >= 4:
+                commuter_score += 15
+            if importance.get('maintenance', 3) >= 4:
+                commuter_score += 15
+                
+            profile_scores['commuter'] = commuter_score
+            
+            # 高級志向判定
+            luxury_score = 0
+            if max_price >= 500:
+                luxury_score += 30
+            if any(bt in ['セダン', 'オープンカー'] for bt in body_types):
+                luxury_score += 15
+             # 重要度による加点
+            if importance.get('design', 3) >= 4:
+                luxury_score += 15
+            if importance.get('safety', 3) >= 4: # 高級車は安全性も重視される傾向
+                luxury_score += 10
+                
+            profile_scores['luxury'] = luxury_score
+            
+            # エコ志向判定
+            eco_score = 0
+            if any(ft in ['ハイブリッド', 'EV', 'PHEV'] for ft in fuel_types):
+                eco_score += 35
+             # 重要度による加点
+            if importance.get('fuel_economy', 3) >= 4:
+                eco_score += 25
+                
+            profile_scores['eco'] = eco_score
+            
+            # スポーツ志向判定
+            sporty_score = 0
+            if any(bt in ['オープンカー'] for bt in body_types):
+                sporty_score += 30
+            if min_seats <= 4:
+                sporty_score += 15
+            # 重要度による加点
+            if importance.get('design', 3) >= 4:
+                sporty_score += 15
+                
+            profile_scores['sporty'] = sporty_score
+            
+            # 最高スコアのプロファイルを返す（最低しきい値以上の場合）
+            best_profile = max(profile_scores, key=profile_scores.get)
+            if profile_scores[best_profile] >= 20:
+                return best_profile
+            else:
+                return 'general'  # 汎用プロファイル
+                
+        except Exception as e:
+            logger.error(f"プロファイル特定エラー: {e}")
+            return 'general'  # エラー時は汎用プロファイルを返す
+
+    def _get_importance_values(self, user_preferences: Dict) -> Dict[str, float]:
+        """ユーザー嗜好から重要度（1-5）を抽出・正規化して返す"""
+        importance = {}
+        target_keys = {
+            'fuel_economy_importance': 'fuel_economy',
+            'safety_importance': 'safety',
+            'design_importance': 'design',
+            'space_importance': 'space',
+            'maintenance_importance': 'maintenance'
+        }
         
-        profile_scores = {}
-        
-        # ファミリー向け判定
-        family_score = 0
-        if min_seats >= 5:
-            family_score += 30
-        if any(bt in ['ミニバン', 'SUV'] for bt in body_types):
-            family_score += 20
-        if max_price <= 400:
-            family_score += 10
-        profile_scores['family'] = family_score
-        
-        # 通勤向け判定
-        commuter_score = 0
-        if max_price <= 300:
-            commuter_score += 25
-        if any(bt in ['ハッチバック', '軽自動車'] for bt in body_types):
-            commuter_score += 20
-        if float(user_preferences.get('fuel_economy_importance', 0)) > 0.5:
-            commuter_score += 15
-        profile_scores['commuter'] = commuter_score
-        
-        # 高級志向判定
-        luxury_score = 0
-        if max_price >= 500:
-            luxury_score += 30
-        if any(bt in ['セダン', 'オープンカー'] for bt in body_types):
-            luxury_score += 15
-        profile_scores['luxury'] = luxury_score
-        
-        # エコ志向判定
-        eco_score = 0
-        if any(ft in ['ハイブリッド', 'EV', 'PHEV'] for ft in fuel_types):
-            eco_score += 35
-        if float(user_preferences.get('fuel_economy_importance', 0)) > 0.7:
-            eco_score += 20
-        profile_scores['eco'] = eco_score
-        
-        # スポーツ志向判定
-        sporty_score = 0
-        if any(bt in ['オープンカー'] for bt in body_types):
-            sporty_score += 30
-        if min_seats <= 4:
-            sporty_score += 15
-        profile_scores['sporty'] = sporty_score
-        
-        # 最高スコアのプロファイルを返す（最低しきい値以上の場合）
-        best_profile = max(profile_scores, key=profile_scores.get)
-        if profile_scores[best_profile] >= 20:
-            return best_profile
-        else:
-            return 'general'  # 汎用プロファイル
+        for key, mapped_key in target_keys.items():
+            try:
+                val = float(user_preferences.get(key, 3)) # デフォルトは3（普通）
+                importance[mapped_key] = val
+            except (ValueError, TypeError):
+                importance[mapped_key] = 3.0
+        return importance
 
     def _calculate_detailed_scores(self, car: Dict, user_preferences: Dict, user_profile: str) -> Dict:
         """
         車両の詳細スコアを計算
         """
-        scores = {}
-        
-        # 1. 価格スコア（0-100）
-        scores['price'] = self._calculate_price_score(car, user_preferences)
-        
-        # 2. 燃費スコア（0-100）
-        scores['fuel_economy'] = self._calculate_fuel_economy_score(car)
-        
-        # 3. サイズ適合度スコア（0-100）
-        scores['size'] = self._calculate_size_score(car, user_preferences)
-        
-        # 4. 安全性スコア（0-100）
-        scores['safety'] = self._calculate_safety_score(car)
-        
-        # 5. 維持費スコア（0-100）
-        scores['maintenance'] = self._calculate_maintenance_score(car)
-        
-        # 6. ブランド信頼性スコア（0-100）
-        scores['brand'] = self._calculate_brand_score(car)
-        
-        # 7. 環境性能スコア（0-100）
-        scores['environmental'] = self._calculate_environmental_score(car)
-        
-        # 8. 用途適合度スコア（0-100）
-        scores['purpose_fit'] = self._calculate_purpose_fit_score(car, user_profile)
-        
-        return scores
+        try:
+            scores = {}
+            
+            # 1. 価格スコア（0-100）
+            scores['price'] = self._calculate_price_score(car, user_preferences)
+            
+            # 2. 燃費スコア（0-100）
+            scores['fuel_economy'] = self._calculate_fuel_economy_score(car)
+            
+            # 3. サイズ適合度スコア（0-100）
+            scores['size'] = self._calculate_size_score(car, user_preferences)
+            
+            # 4. 安全性スコア（0-100）
+            scores['safety'] = self._calculate_safety_score(car)
+            
+            # 5. 維持費スコア（0-100）
+            scores['maintenance'] = self._calculate_maintenance_score(car)
+            
+            # 6. ブランド信頼性スコア（0-100）
+            scores['brand'] = self._calculate_brand_score(car)
+            
+            # 7. 環境性能スコア（0-100）
+            scores['environmental'] = self._calculate_environmental_score(car)
+            
+            # 8. 用途適合度スコア（0-100）
+            scores['purpose_fit'] = self._calculate_purpose_fit_score(car, user_profile)
+            
+            return scores
+            
+        except Exception as e:
+            logger.error(f"詳細スコア計算エラー: {e}")
+            # デフォルトスコアを返す
+            return {
+                'price': 50,
+                'fuel_economy': 50,
+                'size': 50,
+                'safety': 50,
+                'maintenance': 50,
+                'brand': 50,
+                'environmental': 50,
+                'purpose_fit': 50
+            }
 
     def _calculate_price_score(self, car: Dict, user_preferences: Dict) -> int:
         """価格スコア計算"""
         try:
-            price = float(car.get('価格(万円)', 0))
+            # 価格データの取得（複数のカラム名に対応）
+            price_str = car.get('価格帯(万円)', car.get('価格(万円)', '0'))
+            if '~' in str(price_str):
+                # 価格帯の場合は最小値を取得
+                price = float(str(price_str).split('~')[0])
+            else:
+                price = float(price_str)
+                
             max_price = float(user_preferences.get('max_price', 1000)) if user_preferences.get('max_price') else 1000
             
+                
             if price == 0:
                 return 50  # 価格不明の場合は中間点
             
-            if price <= max_price:
+            # 価格単位の補正（データが円単位で、入力が万円単位の場合）
+            if price > 10000:
+                price = price / 10000
+            
+            # ミニバンかつファミリー向けの特別緩和措置
+            # ミニバンは高価になりがちなので、予算を多少オーバーしても許容する
+            is_minivan_family = (car.get('ボディタイプ') == 'ミニバン' and 
+                               user_preferences.get('user_profile') == 'family')
+            
+            effective_max_price = max_price
+            if is_minivan_family:
+                effective_max_price = max_price * 1.2  # 予算20%増しまで許容
+
+            if price <= effective_max_price:
                 # 予算内の場合、安いほど高スコア
-                ratio = price / max_price
+                ratio = price / effective_max_price
                 return int(100 * (1 - ratio * 0.8))  # 80%まで減点
             else:
                 # 予算超過の場合、大幅減点
-                over_ratio = (price - max_price) / max_price
+                over_ratio = (price - effective_max_price) / effective_max_price
                 return max(0, int(50 - over_ratio * 100))
                 
         except (ValueError, TypeError):
@@ -268,7 +381,11 @@ class EnhancedCarRecommendationEngine:
                 return 95
             elif fuel_type in ['ハイブリッド', 'PHEV']:
                 # ハイブリッド系は25km/L以上で満点
-                base_score = min(100, int(fuel_economy * 4))
+                # ただしミニバンは基準を下げる
+                if car.get('ボディタイプ') == 'ミニバン':
+                     base_score = min(100, int(fuel_economy * 5)) # 20km/Lで満点
+                else:
+                     base_score = min(100, int(fuel_economy * 4)) # 25km/Lで満点
             else:
                 # ガソリン車は20km/L以上で満点
                 base_score = min(100, int(fuel_economy * 5))
@@ -289,7 +406,7 @@ class EnhancedCarRecommendationEngine:
             
             # サイズから全長を抽出
             import re
-            size_match = re.search(r'(\d+)×', str(size_str))
+            size_match = re.search(r'(\d+)\s*[×xX*]\s*', str(size_str))
             if not size_match:
                 return 50
                 
@@ -316,13 +433,59 @@ class EnhancedCarRecommendationEngine:
             return 50
 
     def _calculate_safety_score(self, car: Dict) -> int:
-        """安全性スコア計算"""
+        """安全性スコア計算（Tiered Systemに基づく装備評価 + メーカー信頼度）"""
         try:
-            safety_rating = float(car.get('安全評価', 3))
-            # 5段階評価を100点満点に変換
-            return int(safety_rating * 20)
-        except (ValueError, TypeError):
-            return 60  # デフォルト値
+            maker = car.get('メーカー', '').upper()
+            safety_equipment = str(car.get('先進安全装備', '')).strip()
+            
+            # 1. 装備別スコア（Tier 1~3）
+            equipment_score = 50 # Default
+            
+            # マッピングからスコアを検索
+            # 完全一致を優先、なければ部分一致で探す（より柔軟に）
+            if safety_equipment in self.SAFETY_EQUIPMENT_SCORES:
+                equipment_score = self.SAFETY_EQUIPMENT_SCORES[safety_equipment]
+            else:
+                # 装備なし判定
+                if not safety_equipment or safety_equipment.upper() == 'NO':
+                    equipment_score = self.SAFETY_EQUIPMENT_SCORES['NO']
+                else:
+                    # 部分一致検索（マッピングにあるキーが含まれているか）
+                    found_match = False
+                    for key, score in self.SAFETY_EQUIPMENT_SCORES.items():
+                        if key and key in safety_equipment:
+                            equipment_score = score
+                            found_match = True
+                            break
+                    if not found_match:
+                        # 装備名は入っているがマッピングにない場合（Toyota Safety Senseなど一般的なもののバリエーションの可能性）
+                        # デフォルトで高め（標準的）に評価
+                        equipment_score = 80 
+
+            # 2. メーカー別安全信頼度スコア（0-100）
+            maker_safety_scores = {
+                'SUBARU': 95,      # 安全性で高い評価
+                'VOLVO': 95,
+                'TOYOTA': 90,
+                'TOYOYA': 90,
+                'HONDA': 90,
+                'MAZDA': 88,
+                'NISSAN': 85,
+                'MITSUBISHI': 85,
+                'SUZUKI': 80,
+                'DAIHATSU': 80,
+            }
+            maker_score = maker_safety_scores.get(maker, 75)
+            
+            # 最終スコア = 装備評価(70%) + メーカー信頼度(30%)
+            # 装備の有無・性能をより重視する
+            final_score = int(equipment_score * 0.7 + maker_score * 0.3)
+            
+            return max(0, min(100, final_score))
+            
+        except (ValueError, TypeError, Exception) as e:
+            logger.warning(f"安全性スコア計算エラー: {e}")
+            return 50  # デフォルト値
 
     def _calculate_maintenance_score(self, car: Dict) -> int:
         """維持費スコア計算"""
@@ -354,7 +517,7 @@ class EnhancedCarRecommendationEngine:
 
     def _calculate_brand_score(self, car: Dict) -> int:
         """ブランド信頼性スコア計算"""
-        maker = car.get('メーカー', '')
+        maker = car.get('メーカー', '').upper() # 大文字統一
         
         for tier, brands in self.brand_tiers.items():
             if maker in brands:
@@ -428,11 +591,13 @@ class EnhancedCarRecommendationEngine:
         
         return max(0, min(100, score))
 
-    def _calculate_weighted_final_score(self, detailed_scores: Dict, user_profile: str) -> int:
-        """重み付け最終スコア計算"""
+    def _calculate_weighted_final_score(self, detailed_scores: Dict, user_profile: str, user_preferences: Dict) -> int:
+        """重み付け最終スコア計算（動的重み付け対応）"""
+        
+        # 1. 基本重みの取得
         if user_profile == 'general':
-            # 汎用プロファイルの場合は均等重み
-            weights = {
+            # 汎用プロファイルの場合は均等重み（ベース）
+            base_weights = {
                 'price': 0.2,
                 'fuel_economy': 0.2,
                 'size': 0.15,
@@ -442,9 +607,9 @@ class EnhancedCarRecommendationEngine:
                 'environmental': 0.05
             }
         else:
-            # 特定プロファイルの重み
+            # 特定プロファイルの基本重み
             profile_priorities = self.user_profiles[user_profile]['priorities']
-            weights = {
+            base_weights = {
                 'price': profile_priorities.get('price', 0.1),
                 'fuel_economy': profile_priorities.get('fuel_economy', 0.1),
                 'size': profile_priorities.get('size', 0.1),
@@ -455,17 +620,42 @@ class EnhancedCarRecommendationEngine:
                 'purpose_fit': 0.3  # 用途適合度は常に重要
             }
         
+        # 2. ユーザーの重要度スライダーに基づく動的調整
+        # 重要度(1-5)を取得し、3を基準(1.0倍)として、1で0.8倍、5で1.2倍程度に重みを変化させる
+        importance = self._get_importance_values(user_preferences)
+        adjusted_weights = {}
+        
+        # マッピング: 重みキー -> 重要度キー
+        weight_key_map = {
+            'price': 'price', # スライダーがない場合はデフォルト3
+            'fuel_economy': 'fuel_economy',
+            'size': 'space', # 室内空間重要度をサイズにマッピング
+            'safety': 'safety',
+            'maintenance': 'maintenance',
+            'brand': 'design', # デザイン重要度をブランド/感性にマッピング（近似）
+            'environmental': 'fuel_economy', # 燃費重要度を環境性能にも反映
+            'purpose_fit': 'purpose' # 用途適合度は固定だが一応
+        }
+        
+        for factor, base_weight in base_weights.items():
+            imp_key = weight_key_map.get(factor)
+            user_val = importance.get(imp_key, 3.0) 
+            
+            # 補正係数: (0.7 + user_val * 0.1) -> 1=0.8, 3=1.0, 5=1.2
+            modifier = 0.7 + (user_val * 0.1)
+            
+            adjusted_weights[factor] = base_weight * modifier
+
+        # 3. 加重平均の計算（正規化込み）
         final_score = 0
-        total_weight = 0
+        total_weight = sum(adjusted_weights.values())
         
-        for factor, weight in weights.items():
-            if factor in detailed_scores:
-                final_score += detailed_scores[factor] * weight
-                total_weight += weight
-        
-        # 正規化
         if total_weight > 0:
-            final_score = final_score / total_weight
+            for factor, weight in adjusted_weights.items():
+                if factor in detailed_scores:
+                    final_score += detailed_scores[factor] * (weight / total_weight)
+        else:
+            final_score = 0
         
         return max(0, min(100, int(final_score)))
 
@@ -476,6 +666,13 @@ class EnhancedCarRecommendationEngine:
         # 高得点要因の特定
         high_score_factors = {k: v for k, v in detailed_scores.items() if v >= 80}
         
+        # 安全性が特に高い場合の理由追加（Tier 1装備など）
+        if 'safety' in high_score_factors and detailed_scores['safety'] >= 90:
+             safety_equipment = car.get('先進安全装備', '')
+             if safety_equipment and safety_equipment in self.SAFETY_EQUIPMENT_SCORES:
+                  if self.SAFETY_EQUIPMENT_SCORES[safety_equipment] >= 95:
+                       reasons.append(f"最先端の安全装備「{safety_equipment}」を搭載しており、極めて高い安全性を誇ります")
+
         if 'fuel_economy' in high_score_factors:
             fuel_economy = car.get('燃費(km/L)', 0)
             fuel_type = car.get('燃料の種類', '')
@@ -486,9 +683,13 @@ class EnhancedCarRecommendationEngine:
             else:
                 reasons.append(f"燃費が良好（{fuel_economy}km/L）で日常使いに経済的です")
         
-        if 'safety' in high_score_factors:
-            safety = car.get('安全評価', 0)
-            reasons.append(f"高い安全評価（{safety}/5）を獲得しており、安心して運転できます")
+        if 'safety' in high_score_factors and not any("最先端" in r for r in reasons): # 重複回避
+            maker = car.get('メーカー', '')
+            safety_equipment = car.get('先進安全装備', '')
+            if safety_equipment and safety_equipment.upper() != 'NO':
+                reasons.append(f"メーカーの高い安全基準と先進安全装備（{safety_equipment}）により、安心して運転できます")
+            else:
+                reasons.append(f"メーカーの高い安全基準により、安心して運転できます")
         
         if 'maintenance' in high_score_factors:
             tax = car.get('自動車税(円)', 0)
@@ -516,6 +717,14 @@ class EnhancedCarRecommendationEngine:
         return "、".join(reasons[:3])  # 最大3つの理由
 
 # 既存の関数を置き換える関数
+def enhanced_calculate_recommendation_scores(cars, user_preferences):
+    """
+    改善版エンジンで推薦スコアを計算して返す
+    """
+    engine = EnhancedCarRecommendationEngine()
+    return engine.calculate_enhanced_recommendation_scores(cars, user_preferences)
+
+
 def calculate_recommendation_scores(cars, user_preferences):
     """
     推薦スコア計算のメイン関数（ハイブリッド診断対応）
