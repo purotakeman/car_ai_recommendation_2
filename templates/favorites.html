@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,23 +8,45 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced.css') }}">
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>お気に入り</h1>
-            <p class="tagline">保存した車両を確認できます</p>
+            <h1><i class="fas fa-heart"></i> お気に入り</h1>
+            <p class="tagline">保存した車両（最大9件）を確認できます</p>
             <nav class="main-nav">
                 <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-home"></i> トップ</a>
                 <a href="{{ url_for('favorites') }}" class="nav-link active"><i class="far fa-heart"></i> お気に入り</a>
-                <a href="{{ url_for('compare_cars') }}" class="nav-link"><i class="fas fa-balance-scale"></i> 比較</a>
             </nav>
         </header>
 
-        <div class="results-section">
-            <p>このページは準備中です。トップへ戻るには <a href="{{ url_for('home') }}">こちら</a>。</p>
+        <div class="results-section" id="results">
+            <div class="result-header">
+                <h2><i class="fas fa-list"></i> あなたのお気に入り <span class="result-count" id="result-count-display"></span>
+                </h2>
+            </div>
+
+            <div id="favorites-container" class="favorites-grid car-results">
+                <!-- お気に入り車両がここに表示されます -->
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i> 読み込み中...
+                </div>
+            </div>
+
+            <div id="no-favorites-message" style="display: none;" class="no-results">
+                <i class="far fa-heart"></i>
+                <p>お気に入りに登録された車両はありません。</p>
+                <a href="{{ url_for('home') }}" class="btn">車を探しに行く</a>
+            </div>
         </div>
     </div>
+
+    <!-- FontAwesomeアイコン -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- JSスクリプト -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
 </body>
+
 </html>
-
-
