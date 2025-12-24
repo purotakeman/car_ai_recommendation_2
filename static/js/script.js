@@ -200,35 +200,52 @@ function setupFavorites() {
     favoriteButtons.forEach(button => {
         const carId = button.getAttribute('data-car-id');
 
+        // リスナーが既にある場合はスキップ
+        if (button.dataset.listenerAttached) return;
+
         // 初期状態の設定
         if (favorites.includes(carId)) {
-            button.innerHTML = '<i class="fas fa-heart"></i> お気に入り済み';
             button.classList.add('favorited');
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            }
         }
 
         // クリックイベント
         button.addEventListener('click', function (event) {
             event.stopPropagation(); // カード全体のクリックイベントを停止
 
-            if (favorites.includes(carId)) {
+            const icon = button.querySelector('i');
+            const currentFavorites = JSON.parse(localStorage.getItem('carFavorites')) || [];
+
+            if (currentFavorites.includes(carId)) {
                 // お気に入りから削除
-                favorites = favorites.filter(id => id !== carId);
-                button.innerHTML = '<i class="far fa-heart"></i> お気に入り';
+                const updatedFavorites = currentFavorites.filter(id => id !== carId);
+                localStorage.setItem('carFavorites', JSON.stringify(updatedFavorites));
                 button.classList.remove('favorited');
+                if (icon) {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
             } else {
                 // お気に入りに追加
-                favorites.push(carId);
-                button.innerHTML = '<i class="fas fa-heart"></i> お気に入り済み';
+                currentFavorites.push(carId);
+                localStorage.setItem('carFavorites', JSON.stringify(currentFavorites));
                 button.classList.add('favorited');
+                if (icon) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                }
 
                 // 追加時のアニメーション
                 button.classList.add('pulse');
                 setTimeout(() => button.classList.remove('pulse'), 300);
             }
-
-            // ローカルストレージに保存
-            localStorage.setItem('carFavorites', JSON.stringify(favorites));
         });
+
+        button.dataset.listenerAttached = 'true';
     });
 }
 
@@ -519,4 +536,57 @@ function showNotification(message, type = 'info') {
     // 簡易通知実装
     console.log(`[${type.toUpperCase()}] ${message}`);
     alert(message);
+}
+
+// ========================================================================
+// ユーティリティ関数
+// ========================================================================
+
+/**
+ * 価格を整形する関数（Python版 format_currency と同等のロジック）
+ */
+function formatCurrency(value) {
+    if (!value) return '価格未定';
+
+    // 文字列に変換して波ダッシュなどで分割
+    const vStr = String(value);
+
+    // 既に「万円」が含まれている場合は、数値部分だけを抽出して再整形するか、そのまま返す
+    if (vStr.includes('~')) {
+        return vStr.split('~').map(v => formatSingleValue(v)).join('~');
+    } else if (vStr.includes('～')) { // 全角波ダッシュ
+        return vStr.split('～').map(v => formatSingleValue(v)).join('~');
+    }
+
+    return formatSingleValue(vStr);
+}
+
+/**
+ * 単一の数値を整形するヘルパー関数
+ */
+function formatSingleValue(vStr) {
+    if (!vStr) return '';
+
+    // 数値以外の文字（カンマ、単位など）を取り除く
+    let cleanStr = String(vStr).replace(/,/g, '').replace(/万円/g, '').replace(/円/g, '').trim();
+    const v = parseFloat(cleanStr);
+
+    if (isNaN(v)) return vStr;
+
+    let result = v;
+    // 10000以上の場合は万円単位に変換(データが円単位の場合の補正)
+    if (result >= 10000) {
+        result = result / 10000;
+    }
+
+    // 整数なら整数表示、小数なら小数点1桁まで
+    if (Number.isInteger(result)) {
+        return result.toLocaleString();
+    } else {
+        // 小数点第1位まで表示
+        return result.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 1
+        });
+    }
 }

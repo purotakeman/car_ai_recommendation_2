@@ -418,6 +418,24 @@ input[type="number"]:focus {
     gap: var(--spacing-lg);
 }
 
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+}
+
+@media (max-width: 992px) {
+    .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .favorites-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .car-card {
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -445,6 +463,30 @@ input[type="number"]:focus {
     margin: 0;
     color: #2c3e50;
     font-size: 1.2rem;
+}
+
+.favorite-button.favorited i {
+    color: #ff4d6d;
+    font-weight: 900;
+    /* fas weight */
+}
+
+.favorite-button.pulse {
+    animation: pulse-animation 0.3s ease-out;
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .score-badge {

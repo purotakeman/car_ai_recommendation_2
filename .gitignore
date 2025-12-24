@@ -1,0 +1,31 @@
+# 機密情報
+.env
+
+# 環境変数
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+prefix/
+bin/
+lib/
+share/
+pyvenv.cfg
+venv/
+.venv/
+
+# データ/キャッシュ
+data/youtube_cache.json
+*.log
+
+# エディタ/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

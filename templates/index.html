@@ -58,7 +58,6 @@
             <nav class="main-nav">
                 <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-home"></i> トップ</a>
                 <a href="{{ url_for('favorites') }}" class="nav-link"><i class="far fa-heart"></i> お気に入り</a>
-                <a href="{{ url_for('compare_cars') }}" class="nav-link"><i class="fas fa-balance-scale"></i> 比較</a>
             </nav>
         </header>
 
@@ -684,6 +683,12 @@
                                 <img src="{{ car.youtube_thumbnail }}" alt="{{ car['メーカー'] }} {{ car['車種'] }} レビュー動画">
                                 <div class="video-play-badge"><i class="fab fa-youtube"></i> 動画</div>
                             </a>
+                            {% else %}
+                            <div class="car-overview">
+                                <img src="{{ url_for('static', filename='images/car_placeholder.png') }}"
+                                    alt="{{ car['メーカー'] }} {{ car['車種'] }}"
+                                    style="width:100%; height:auto; border-radius:4px; margin-top:10px;">
+                            </div>
                             {% endif %}
                         </div>
 

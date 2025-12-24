@@ -27,7 +27,6 @@
             <nav class="main-nav">
                 <a href="{{ url_for('home') }}" class="nav-link"><i class="fas fa-home"></i> トップ</a>
                 <a href="{{ url_for('favorites') }}" class="nav-link"><i class="far fa-heart"></i> お気に入り</a>
-                <a href="{{ url_for('compare_cars') }}" class="nav-link"><i class="fas fa-balance-scale"></i> 比較</a>
             </nav>
         </header>
 
@@ -36,7 +35,7 @@
                 <h2>{{ car['メーカー'] }} {{ car['車種'] }}</h2>
                 <div class="car-actions">
                     <button class="action-button favorite-button" data-car-id="{{ car['id'] }}">
-                        <i class="far fa-heart"></i> お気に入り追加
+                        <i class="far fa-heart"></i>
                     </button>
                     <button class="action-button share-button">
                         <i class="fas fa-share-alt"></i> シェア

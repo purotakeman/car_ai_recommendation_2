@@ -404,6 +404,33 @@ def api_get_cars():
     
     return jsonify(cars)
 
+@app.route("/api/cars/batch", methods=["POST"])
+def api_get_cars_batch():
+    """
+    複数車両のIDリストを受け取り、それらの情報をJSON形式で返すAPI
+    """
+    data = request.get_json()
+    if not data or 'ids' not in data:
+        return jsonify({"error": "IDリストが指定されていません"}), 400
+    
+    car_ids = [int(cid) for cid in data['ids'] if str(cid).isdigit()]
+    all_cars = load_car_data()
+    
+    # 指定されたIDに一致する車両を抽出
+    selected_cars = [car for car in all_cars if int(car.get('id', 0)) in car_ids]
+    
+    # YouTube情報の取得（検索結果表示に合わせる）
+    for car in selected_cars:
+        try:
+            videos = get_car_videos(car.get('メーカー'), car.get('車種'), count=1)
+            if videos:
+                car['youtube_url'] = videos[0]['url']
+                car['youtube_thumbnail'] = videos[0]['thumbnail']
+        except Exception as e:
+            print(f"Batch YouTube retrieval error for {car.get('車種')}: {e}")
+    
+    return jsonify(selected_cars)
+
 # API: 特定の車両情報をJSON形式で提供
 @app.route("/api/cars/<int:car_id>")
 def api_get_car(car_id):
@@ -903,96 +930,7 @@ def favorites():
     """
     return render_template("favorites.html")
 
-# 車両比較機能のルート
-@app.route("/compare")
-def compare_cars():
-    """
-    車両比較ページ
-    複数の車両を並べて比較表示
-    """
-    car_ids = request.args.getlist('ids')
-    cars = load_car_data()
-    selected_cars = [car for car in cars if str(car.get('id', '')) in car_ids] if car_ids else []
 
-    # 比較用データの準備（選択がある場合のみ）
-    comparison_data = prepare_comparison_data(selected_cars) if selected_cars else {}
-
-    return render_template(
-        "car_compare.html",
-        cars=selected_cars,
-        comparison_data=comparison_data
-    )
-
-def prepare_comparison_data(cars):
-    """
-    車両比較用のデータを準備
-    
-    Parameters:
-    -----------
-    cars : list
-        比較対象の車両リスト
-        
-    Returns:
-    --------
-    dict
-        比較表示用のデータ
-    """
-    comparison_data = {
-        'categories': [
-            '価格', '燃費', '安全性', '維持費', 'ブランド',
-            '環境性能', '乗車定員', '荷室容量'
-        ],
-        'charts_data': {}
-    }
-    
-    # 各車両のレーダーチャート用データを準備
-    for car in cars:
-        car_name = f"{car.get('メーカー', '')} {car.get('車種', '')}"
-        
-        # 詳細スコアがある場合は使用、なければ簡易計算
-        if '詳細スコア' in car:
-            scores = car['詳細スコア']
-        elif 'detailed_scores' in car:
-            scores = car['detailed_scores']
-        else:
-            # 簡易スコア計算
-            min_p, max_p = parse_price_range(car.get('価格帯(万円)', ''))
-            price = min_p if min_p is not None else 300
-            fuel_economy = float(car.get('燃費(km/L)', 15))
-            
-            # 安全スコアはメーカーと先進安全装備から計算（簡易版）
-            maker = car.get('メーカー', '').upper()
-            safety_equipment = str(car.get('先進安全装備', '')).strip()
-            maker_safety_scores = {
-                'SUBARU': 95, 'VOLVO': 95, 'TOYOTA': 90, 'TOYOYA': 90,
-                'HONDA': 90, 'MAZDA': 88, 'NISSAN': 85, 'MITSUBISHI': 85,
-                'SUZUKI': 80, 'DAIHATSU': 80
-            }
-            maker_score = maker_safety_scores.get(maker, 75)
-            equipment_score = 90 if safety_equipment and safety_equipment.upper() != 'NO' else 50
-            safety = int(maker_score * 0.7 + equipment_score * 0.3)
-            
-            scores = {
-                'price': min(100, int(500 / max(1, price) * 100)),  # 安いほど高スコア
-                'fuel_economy': min(100, int(fuel_economy * 4)),     # 燃費の4倍をスコア
-                'safety': safety,                                    # メーカー+装備から計算
-                'maintenance': 70,  # デフォルト値
-                'brand': 80,       # デフォルト値
-                'environmental': 60  # デフォルト値
-            }
-        
-        comparison_data['charts_data'][car_name] = [
-            scores.get('price', 50),
-            scores.get('fuel_economy', 50),
-            scores.get('safety', 60),
-            scores.get('maintenance', 70),
-            scores.get('brand', 80),
-            scores.get('environmental', 60),
-            int(car.get('乗車定員', 5)) * 20,  # 5人乗りを100点とする
-            80  # 荷室容量（仮想値）
-        ]
-    
-    return comparison_data
 
 # エラーハンドリング
 @app.errorhandler(404)
