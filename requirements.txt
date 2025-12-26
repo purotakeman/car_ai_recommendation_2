@@ -9,3 +9,4 @@ requests==2.31.0
 beautifulsoup4==4.12.3
 numpy==1.26.3
 python-dotenv==1.0.0
+gunicorn==21.2.0

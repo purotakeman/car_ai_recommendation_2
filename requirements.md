@@ -284,16 +284,17 @@ AI自動車診断システム（Car AI Recommendation System）
 ### 5.1 ディレクトリ構造
 ```
 car_ai_recommendation/
-├── app.py                    # メインのFlaskアプリ
+├── app.py                    # Flaskのメインアプリケーション
 ├── requirements.txt          # 依存パッケージリスト
 ├── README.md                 # プロジェクト説明
 ├── requirements.md           # 要件定義書（本ドキュメント）
 ├── FUNCTIONAL_SPEC.md        # 機能仕様書
+├── .env                      # APIキー設定(Git管理外) 
+├── .gitignore                # 不要ファイル除外設定
 │
-├── /templates/               # HTMLテンプレート
+├── /templates/               # 各画面のHTML
 │   ├── index.html            # メインページ
 │   ├── car_detail.html       # 車両詳細ページ
-│   ├── car_compare.html      # 車両比較ページ
 │   ├── favorites.html        # お気に入りページ
 │   ├── 404.html              # 404エラーページ
 │   └── 500.html              # 500エラーページ
@@ -308,15 +309,18 @@ car_ai_recommendation/
 │   │   ├── script.js         # メイン機能
 │   │   ├── detail.js         # 詳細ページ機能
 │   │   ├── enhanced.js       # 拡張機能
-│   │   └── hybrid.js          # ハイブリッド診断機能
+│   │   ├── script.js         # フォーム操作機能
+│   │   └── hybrid.js         # ハイブリッド診断機能
 │   └── /images/              # 画像ファイル
 │       └── car_placeholder.png # 車両プレースホルダー画像
 │
-├── /data/                    # データ関連ファイル
+├── /data/                    # 車両DB(CSV)およびキャッシュ
+│   ├── youtube_cache.json    # YouTube動画キャッシュ
 │   └── car_data_base.csv     # 車両データCSV
 │
-└─── /utils/                   # ユーティリティ関数
+└─── /utils/                  # 推薦・Youtube連携ロジック
     ├── filters.py            # フィルタリング関数
+    ├── youtube.py            # Youtube連携関数
     └── recommendation.py     # 推薦ロジック
 ```
 

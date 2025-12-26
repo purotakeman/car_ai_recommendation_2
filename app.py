@@ -1025,41 +1025,6 @@ if __name__ == "__main__":
     os.makedirs('data', exist_ok=True)
     
     # デバッグ情報の表示
-    print("="*50)
-    print("🚗 AI自動車推薦システム 起動中...")
-    print("="*50)
     
-    # CSVファイルの存在確認
-    csv_paths = ["data/car_data_base.csv", "data/car_data.csv", "car_data_base.csv", "car_data.csv"]
-    csv_found = False
-    for csv_path in csv_paths:
-        if os.path.exists(csv_path):
-            csv_found = True
-            try:
-                cars = load_car_data()
-                print(f"✅ 車両データ読み込み成功: {len(cars)}台 (ファイル: {csv_path})")
-                
-                # データ品質チェック
-                makers = set(car.get('メーカー', '') for car in cars if car.get('メーカー'))
-                body_types = set(car.get('ボディタイプ', '') for car in cars if car.get('ボディタイプ'))
-                
-                print(f"📊 メーカー数: {len(makers)}")
-                print(f"📊 ボディタイプ数: {len(body_types)}")
-                
-            except Exception as e:
-                print(f"❌ データ読み込みエラー: {e}")
-            break
-    
-    if not csv_found:
-        print("⚠️  車両データCSVファイルが見つかりません")
-        print("   以下のパスを確認してください:")
-        for path in csv_paths:
-            print(f"   - {path}")
-    
-    print("="*50)
-    print("🌐 アクセス先: http://localhost:5000/")
-    print("🛑 停止方法: Ctrl+C")
-    print("="*50)
-    
-    # デバッグモードで実行
-    app.run(debug=True)
+    # 本番環境ではデバッグモードを無効化
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
