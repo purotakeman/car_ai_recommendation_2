@@ -105,7 +105,7 @@ class EnhancedCarRecommendationEngine:
         # ブランド階層（信頼性・ブランド力の評価用）
         self.brand_tiers = {
             'premium': ['レクサス', 'メルセデス・ベンツ', 'BMW', 'アウディ', 'ボルボ'],
-            'mainstream': ['トヨタ', 'ホンダ', '日産', 'マツダ', 'スバル', 'TOYOTA', 'HONDA', 'NISSAN', 'MAZDA', 'SUBARU', 'TOYOYA', 'MISSUBISHI', 'MITSUBISHI'],
+            'mainstream': ['トヨタ', 'ホンダ', '日産', 'マツダ', 'スバル', 'TOYOTA', 'HONDA', 'NISSAN', 'MAZDA', 'SUBARU', 'MITSUBISHI'],
             'value': ['ダイハツ', 'スズキ', '三菱', 'DAIHATSU', 'SUZUKI'],
             'specialty': ['テスラ', 'ポルシェ', 'フェラーリ']
         }
@@ -467,7 +467,6 @@ class EnhancedCarRecommendationEngine:
                 'SUBARU': 95,      # 安全性で高い評価
                 'VOLVO': 95,
                 'TOYOTA': 90,
-                'TOYOYA': 90,
                 'HONDA': 90,
                 'MAZDA': 88,
                 'NISSAN': 85,
