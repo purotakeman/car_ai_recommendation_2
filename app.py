@@ -91,17 +91,17 @@ def load_car_data():
     for col in string_columns:
         if col in df.columns:
             if col == 'ボディタイプ':
-                df[col].fillna('不明', inplace=True)
+                df[col] = df[col].fillna('不明')
             elif col == '駆動方式':
-                df[col].fillna('不明', inplace=True)
+                df[col] = df[col].fillna('不明')
             elif col == '燃料の種類':
-                df[col].fillna('ガソリン', inplace=True)
+                df[col] = df[col].fillna('ガソリン')
             elif col == 'グレード・モデル':
-                df[col].fillna('', inplace=True)
+                df[col] = df[col].fillna('')
             elif col == '先進安全装備':
-                df[col].fillna('NO', inplace=True)
+                df[col] = df[col].fillna('NO')
             else:
-                df[col].fillna('未定', inplace=True)
+                df[col] = df[col].fillna('未定')
     
     # データ型の安全性を確保（NaN値を文字列に変換）
     for col in df.columns:

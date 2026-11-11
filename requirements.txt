@@ -3,10 +3,10 @@
 # セットアップの自動化: pip install -r requirements.txt というコマンド一発で、必要なライブラリを全てインストールできます。
 # デプロイ（公開）: インターネット上にアプリを公開する際、サーバーに「これを入れてね」と伝える役割があります。
 
-flask==3.0.0
-pandas==2.1.4
-requests==2.31.0
-beautifulsoup4==4.12.3
-numpy==1.26.3
-python-dotenv==1.0.0
+flask==3.1.1
+pandas==2.3.0
+requests==2.32.4
+beautifulsoup4==4.13.4
+numpy==2.3.0
+python-dotenv==1.1.0
 gunicorn==21.2.0
